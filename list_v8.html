@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymerase Database</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Popover custom styling */
+        .popover {
+            max-width: 300px;
+        }
+        
+        .popover-content p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .popover-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .properties-btn:focus {
+            box-shadow: none;
+        }
+        
+        :root {
+            --primary-color: #1a4f7c;
+            --secondary-color: #2d7fc1;
+            --hover-color: #1d5b8f;
+            --badge-bg: #e9ecef;
+            --badge-text: #495057;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            transition: all 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: white;
+            padding: 12px 15px;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 250px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        /* Styles specific to Modified Polymerases section */
+        #modified .filter-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        #modified .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        #modified .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        #modified .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #6c757d;
+        }
+
+        #search {
+            padding-left: 40px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 500;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            .sidebar a span {
+                display: none;
+            }
+            .content {
+                margin-left: 60px;
+            }
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner-border {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h4>Polymerase DB</h4>
+        </div>
+        <a href="#" class="menu-item active" data-target="wild-type">
+            <span>Wild-type Polymerases</span>
+        </a>
+        <a href="#" class="menu-item" data-target="modified">
+            <span>Modified Polymerases</span>
+        </a>
+        <a href="#" class="menu-item" data-target="fusion">
+            <span>Fusion Domains</span>
+        </a>
+    </nav>
+    
+    <div class="content">
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search" class="form-control" placeholder="Search in current section...">
+        </div>
+        
+        <div id="wild-type" class="data-section">
+            <h2 class="section-header">
+                Wild-type Polymerases
+            </h2>
+            <!-- Filter Section -->
+            <div class="filter-container">
+                <h5 class="mb-3">Filter Polymerases</h5>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="form-label">Temperature Range (°C)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="tempMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="tempMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">pH Range</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="phMin" placeholder="Min" step="0.1">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="phMax" placeholder="Max" step="0.1">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Processivity (bp)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="procMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="procMax" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="form-label">Activity (U/mg)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="activityMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="activityMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Salt Tolerance NaCl (mM)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="naclMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="naclMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Salt Tolerance KCl (mM)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="kclMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="kclMax" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-secondary" id="resetFilters">Reset Filters</button>
+                    <button class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Source</th>
+                                <th>Family</th>
+                                <th>5'-3' Exo Activity</th>
+                                <th>DOI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wild-table-body">
+                            {% for poly in wild_types %}
+                            <tr>
+                                <td><strong>{{ poly.name }}</strong></td>
+                                <td>{{ poly.source_strain }}</td>
+                                <td><span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">{{ poly.family }}</span></td>
+                                <td>{{ poly.exo_activity }}</td>
+                                <td><a href="{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt"></i> View
+                                </a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modified Polymerases section with similar improvements -->
+        <div id="modified" class="data-section hidden">
+            <h2 class="section-header">
+                Modified Polymerases
+            </h2>
+            <!-- Filter Section - Only for Modified Polymerases -->
+            <div class="filter-container">
+                <h5 class="mb-3">Filter Modified Polymerases</h5>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="form-label">Temperature Range (°C)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="tempMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="tempMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">pH Range</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="phMin" placeholder="Min" step="0.1">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="phMax" placeholder="Max" step="0.1">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Processivity (bp)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="procMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="procMax" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="form-label">Activity (U/mg)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="activityMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="activityMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Salt Tolerance NaCl (mM)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="naclMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="naclMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label class="form-label">Salt Tolerance KCl (mM)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="kclMin" placeholder="Min">
+                            <span class="input-group-text">-</span>
+                            <input type="number" class="form-control" id="kclMax" placeholder="Max">
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-secondary" id="resetFilters">Reset Filters</button>
+                    <button class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Base Polymerase</th>
+                                <th>Modification Type</th>
+                                <th>Properties</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modified-table-body">
+                            {% for poly in modifieds %}
+                            <tr>
+                                <td><strong>{{ poly.name }}</strong></td>
+                                <td>{{ poly.base_polymerase }}</td>
+                                <td><span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">{{ poly.modification_type }}</span></td>
+                                <td>
+                                    <button class="btn btn-sm" 
+                                            style="background-color: var(--primary-color); color: white;" 
+                                            data-bs-toggle="tooltip" 
+                                            title="Optimal Temp: {{ poly.optimal_temp }}°C&#13;Processivity: {{ poly.processivity }} bp&#13;pH: {{ poly.optimal_ph }}">
+                                        <i class="fas fa-info-circle"></i> Properties
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href="{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fusion Domains section -->
+        <div id="fusion" class="data-section hidden">
+            <h2 class="section-header">
+                Fusion Domains
+            </h2>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Source</th>
+                                <th>Strain</th>
+                                <th>Length</th>
+                                <th>DOI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fusion-table-body">
+                            {% for domain in fusions %}
+                            <tr>
+                                <td><strong>{{ domain.name }}</strong></td>
+                                <td><span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">{{ domain.functional_type }}</span></td>
+                                <td>{{ domain.source_protein }}</td>
+                                <td>{{ domain.strain }}</td>
+                                <td>{{ domain.length }}</td>
+                                <td>
+                                    <a href="{{ domain.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize popovers
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl, {
+                    container: 'body'
+                })
+            });
+            
+            // Close other popovers when opening a new one
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('properties-btn')) {
+                    popoverList.forEach(function(popover) {
+                        if (popover._element !== e.target) {
+                            popover.hide();
+                        }
+                    });
+                } else if (!e.target.closest('.popover')) {
+                    popoverList.forEach(function(popover) {
+                        popover.hide();
+                    });
+                }
+            });
+
+            // Menu item click handling
+            $('.menu-item').click(function(e) {
+                e.preventDefault();
+                $('.menu-item').removeClass('active');
+                $(this).addClass('active');
+                $('.data-section').addClass('hidden');
+                $('#' + $(this).data('target')).removeClass('hidden');
+                $('#search').val(''); // Clear search when switching sections
+                
+                if ($(this).data('target') === 'modified') {
+                    // Reset filters when entering Modified section
+                    $('#modified .filter-container input').val('');
+                    $('#modified tbody tr').show();
+                }
+            });
+            
+            // Search functionality
+            $('#search').on('input', function() {
+                let searchTerm = $(this).val().toLowerCase();
+                $('.data-section:not(.hidden) tbody tr').each(function() {
+                    let rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.includes(searchTerm));
+                });
+            });
+
+            // Filter functionality - Only for Modified Polymerases
+            $('#modified #applyFilters').click(function() {
+                $('#modified tbody tr').each(function() {
+                    let show = true;
+                    const $row = $(this);
+                    
+                    // Get properties from the tooltip data
+                    const propertiesBtn = $row.find('.properties-btn');
+                    if (propertiesBtn.length) {
+                        const tooltipContent = propertiesBtn.attr('data-bs-title') || propertiesBtn.attr('title');
+                        
+                        // Helper function to extract numeric values
+                        function extractValue(property) {
+                            const regex = new RegExp(property + ":<\\/strong> ([\\d.]+)");
+                            const match = tooltipContent.match(regex);
+                            return match ? parseFloat(match[1]) : null;
+                        }
+
+                        // Check temperature range
+                        const temp = extractValue('Optimal Temperature');
+                        if (temp !== null) {
+                            const minTemp = $('#modified #tempMin').val();
+                            const maxTemp = $('#modified #tempMax').val();
+                            if (minTemp && temp < minTemp) show = false;
+                            if (maxTemp && temp > maxTemp) show = false;
+                        }
+
+                        // Check pH range
+                        const ph = extractValue('pH');
+                        if (ph !== null) {
+                            const minPh = $('#modified #phMin').val();
+                            const maxPh = $('#modified #phMax').val();
+                            if (minPh && ph < minPh) show = false;
+                            if (maxPh && ph > maxPh) show = false;
+                        }
+
+                        // Check processivity range
+                        const proc = extractValue('Processivity');
+                        if (proc !== null) {
+                            const minProc = $('#modified #procMin').val();
+                            const maxProc = $('#modified #procMax').val();
+                            if (minProc && proc < minProc) show = false;
+                            if (maxProc && proc > maxProc) show = false;
+                        }
+
+                        // Check activity range
+                        const activity = extractValue('Activity');
+                        if (activity !== null) {
+                            const minActivity = $('#modified #activityMin').val();
+                            const maxActivity = $('#modified #activityMax').val();
+                            if (minActivity && activity < minActivity) show = false;
+                            if (maxActivity && activity > maxActivity) show = false;
+                        }
+
+                        // Check NaCl tolerance range
+                        const nacl = tooltipContent.match(/NaCl: ([\d.]+)/);
+                        if (nacl) {
+                            const naclValue = parseFloat(nacl[1]);
+                            const minNacl = $('#modified #naclMin').val();
+                            const maxNacl = $('#modified #naclMax').val();
+                            if (minNacl && naclValue < minNacl) show = false;
+                            if (maxNacl && naclValue > maxNacl) show = false;
+                        }
+
+                        // Check KCl tolerance range
+                        const kcl = tooltipContent.match(/KCl: ([\d.]+)/);
+                        if (kcl) {
+                            const kclValue = parseFloat(kcl[1]);
+                            const minKcl = $('#modified #kclMin').val();
+                            const maxKcl = $('#modified #kclMax').val();
+                            if (minKcl && kclValue < minKcl) show = false;
+                            if (maxKcl && kclValue > maxKcl) show = false;
+                        }
+                    }
+                    
+                    $(this).toggle(show);
+                });
+            });
+
+            // Reset filters - Only for Modified Polymerases
+            $('#modified #resetFilters').click(function() {
+                // Reset all filter inputs in Modified section
+                $('#modified .filter-container input').val('');
+                // Show all rows in Modified section
+                $('#modified tbody tr').show();
+            });
+
+            // Show loading spinner when loading data
+            $(document).ajaxStart(function() {
+                $('.spinner-border').show();
+            }).ajaxStop(function() {
+                $('.spinner-border').hide();
+            });
+        });
+    </script>
+</body>
+</html>

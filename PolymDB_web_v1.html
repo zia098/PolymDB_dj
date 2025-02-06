@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymerase Database</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #f5f6fa;
+            --menu-width: 250px;
+            --border-color: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--menu-width);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: var(--menu-width);
+            flex: 1;
+            padding: 20px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background-color: var(--secondary-color);
+        }
+
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f0f2f5;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .section-title {
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="menu-item active" data-section="wild-type">Wild-type Polymerases</div>
+            <div class="menu-item" data-section="modified">Modified Polymerases</div>
+            <div class="menu-item" data-section="fusion">Fusion Domains</div>
+        </nav>
+
+        <main class="main-content">
+            <section class="search-section">
+                <div class="search-bar">
+                    <input type="text" id="search" placeholder="Search polymerases...">
+                    <button onclick="searchPolymerases()">Search</button>
+                </div>
+            </section>
+
+            <!-- Wild-type Polymerases Section -->
+            <section id="wild-type-section">
+                <h2 class="section-title">Wild-type Polymerases</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Source Strain</th>
+                                <th>Family</th>
+                                <th>5'-3' exo activity</th>
+                                <th>Engineered Variants</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wild-type-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Modified Polymerases Section -->
+            <section id="modified-section" class="hidden">
+                <h2 class="section-title">Modified Polymerases</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Wild-type</th>
+                                <th>Modification Type</th>
+                                <th>Modifications</th>
+                                <th>Optimal Temperature (°C)</th>
+                                <th>Melting Temperature (°C)</th>
+                                <th>Processivity (bp)</th>
+                                <th>Binding Affinity kd (nM)</th>
+                                <th>pH Stability Range</th>
+                                <th>Optimal pH</th>
+                                <th>Salt Tolerance NaCl (mM)</th>
+                                <th>Salt Tolerance KCl (mM)</th>
+                                <th>Activity (U/mg)</th>
+                                <th>5'-3' exo activity</th>
+                                <th>Enhanced Properties</th>
+                                <th>Applications</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modified-table"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Fusion Domains Section -->
+            <section id="fusion-section" class="hidden">
+                <h2 class="section-title">Fusion Domains</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Strain</th>
+                                <th>Protein Family</th>
+                                <th>Length (aa)</th>
+                                <th>Fusions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fusion-table"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Sample data
+        const wildTypePolymerases = [{
+            name: "Bst Polymerase",
+            source_strain: "Bacillus stearothermophilus",
+            family: "A-family",
+            exo_activity: "No",
+            engineered_variants: 8
+        }];
+
+        const modifiedPolymerases = [{
+            name: "HpStBL",
+            wild_type: "Bst",
+            modification_type: "Chimeric",
+            modifications: "Hp47 and Sto7d domains fused at the N-terminus of Bst LF",
+            optimal_temp: NaN,
+            melting_temp: NaN,
+            processivity: NaN,
+            binding_affinity: NaN,
+            ph_range: "5.0-10.0",
+            optimal_ph: 9.6,
+            salt_tolerance_nacl: 20,
+            salt_tolerance_kcl: 100,
+            activity: 1.91*10^5,
+            exo_activity: "No",
+            enhanced_properties: "Enhanced RT activity, faster amplification",
+            applications: "RT-LAMP, LAMP"
+        }];
+
+        const fusionDomains = [{
+            name: "Sso7d",
+            type: "DNA binding",
+            strain: "Sulfolobus solfataricus",
+            protein_family: "Sso7d",
+            length: 65,
+            fusions: 8
+        }];
+
+        // Create table row HTML
+        function createWildTypeRow(poly) {
+            return `
+                <tr>
+                    <td>${poly.name}</td>
+                    <td>${poly.source_strain}</td>
+                    <td>${poly.family}</td>
+                    <td>${poly.exo_activity}</td>
+                    <td><a href="#" style="color: var(--secondary-color); text-decoration: none;">${poly.engineered_variants}</a></td>
+                </tr>
+            `;
+        }
+
+        function createModifiedRow(poly) {
+            return `
+                <tr>
+                    <td>${poly.name}</td>
+                    <td>${poly.wild_type}</td>
+                    <td>${poly.modification_type}</td>
+                    <td>${poly.modifications}</td>
+                    <td>${poly.optimal_temp}</td>
+                    <td>${poly.melting_temp}</td>
+                    <td>${poly.processivity}</td>
+                    <td>${poly.binding_affinity}</td>
+                    <td>${poly.ph_range}</td>
+                    <td>${poly.optimal_ph}</td>
+                    <td>${poly.salt_tolerance_nacl}</td>
+                    <td>${poly.salt_tolerance_kcl}</td>
+                    <td>${poly.activity}</td>
+                    <td>${poly.exo_activity}</td>
+                    <td>${poly.enhanced_properties}</td>
+                    <td>${poly.applications}</td>
+                </tr>
+            `;
+        }
+
+        function createFusionRow(domain) {
+            return `
+                <tr>
+                    <td>${domain.name}</td>
+                    <td>${domain.type}</td>
+                    <td>${domain.strain}</td>
+                    <td>${domain.protein_family}</td>
+                    <td>${domain.length}</td>
+                    <td><a href="#" style="color: var(--secondary-color); text-decoration: none;">${domain.fusions}</a></td>
+                </tr>
+            `;
+        }
+
+        // Display functions
+        function displayWildType() {
+            const table = document.getElementById('wild-type-table');
+            table.innerHTML = wildTypePolymerases.map(createWildTypeRow).join('');
+        }
+
+        function displayModified() {
+            const table = document.getElementById('modified-table');
+            table.innerHTML = modifiedPolymerases.map(createModifiedRow).join('');
+        }
+
+        function displayFusion() {
+            const table = document.getElementById('fusion-table');
+            table.innerHTML = fusionDomains.map(createFusionRow).join('');
+        }
+
+        // Navigation handling
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // Hide all sections
+                document.querySelectorAll('main > section').forEach(section => {
+                    if (section.id !== 'search-section') {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                // Show selected section
+                const sectionId = item.dataset.section + '-section';
+                document.getElementById(sectionId).classList.remove('hidden');
+
+                // Update search placeholder
+                updateSearchPlaceholder(item.dataset.section);
+            });
+        });
+
+        function updateSearchPlaceholder(section) {
+            const searchInput = document.getElementById('search');
+            switch(section) {
+                case 'wild-type':
+                    searchInput.placeholder = 'Search wild-type polymerases...';
+                    break;
+                case 'modified':
+                    searchInput.placeholder = 'Search modified polymerases...';
+                    break;
+                case 'fusion':
+                    searchInput.placeholder = 'Search fusion domains...';
+                    break;
+            }
+        }
+
+        // Search functionality
+        function searchPolymerases() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const activeSection = document.querySelector('.menu-item.active').dataset.section;
+
+            switch(activeSection) {
+                case 'wild-type':
+                    const filteredWildType = wildTypePolymerases.filter(poly =>
+                        poly.name.toLowerCase().includes(searchTerm) ||
+                        poly.source_strain.toLowerCase().includes(searchTerm) ||
+                        poly.family.toLowerCase().includes(searchTerm)
+                    );
+                    document.getElementById('wild-type-table').innerHTML = 
+                        filteredWildType.map(createWildTypeRow).join('');
+                    break;
+                case 'modified':
+                    const filteredModified = modifiedPolymerases.filter(poly =>
+                        poly.name.toLowerCase().includes(searchTerm) ||
+                        poly.wild_type.toLowerCase().includes(searchTerm) ||
+                        poly.modifications.toLowerCase().includes(searchTerm)
+                    );
+                    document.getElementById('modified-table').innerHTML = 
+                        filteredModified.map(createModifiedRow).join('');
+                    break;
+                case 'fusion':
+                    const filteredFusion = fusionDomains.filter(domain =>
+                        domain.name.toLowerCase().includes(searchTerm) ||
+                        domain.type.toLowerCase().includes(searchTerm) ||
+                        domain.protein_family.toLowerCase().includes(searchTerm)
+                    );
+                    document.getElementById('fusion-table').innerHTML = 
+                        filteredFusion.map(createFusionRow).join('');
+                    break;
+            }
+        }
+
+        // Search input event listener
+        document.getElementById('search').addEventListener('input', searchPolymerases);
+
+        // Initialize display
+        displayWildType();
+        displayModified();
+        displayFusion();
+    </script>
+</body>
+</html>

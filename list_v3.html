@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymerase Database</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;      /* Darker blue */
+            --secondary-color: #2c5282;    /* Medium blue */
+            --hover-color: #2b6cb0;        /* Light blue */
+            --background-color: #f7fafc;   /* Very light gray-blue */
+            --text-color: #2d3748;         /* Dark gray */
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            transition: all 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 12px 15px;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 250px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        #search {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive table */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            .content {
+                margin-left: 60px;
+            }
+            .table-responsive {
+                overflow-x: auto;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h4>Polymerase DB</h4>
+        </div>
+        <a href="#" class="menu-item active" data-target="wild-type">Wild-type Polymerases</a>
+        <a href="#" class="menu-item" data-target="modified">Modified Polymerases</a>
+        <a href="#" class="menu-item" data-target="fusion">Fusion Domains</a>
+    </nav>
+    
+    <div class="content">
+        <div class="search-container">
+            <input type="text" id="search" class="form-control" placeholder="Search in current section...">
+        </div>
+        
+        <div id="wild-type" class="data-section">
+            <h2 class="section-header">Wild-type Polymerases</h2>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Source</th>
+                                <th>Family</th>
+                                <th>5'-3' Exo Activity</th>
+                                <th>DOI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wild-table-body">
+                            {% for poly in wild_types %}
+                            <tr>
+                                <td><strong>{{ poly.name }}</strong></td>
+                                <td>{{ poly.source_strain }}</td>
+                                <td><span class="badge bg-secondary">{{ poly.family }}</span></td>
+                                <td>{{ poly.exo_activity }}</td>
+                                <td><a href="{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="modified" class="data-section hidden">
+            <h2 class="section-header">Modified Polymerases</h2>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Base Polymerase</th>
+                                <th>Modification Type</th>
+                                <th>Properties</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modified-table-body">
+                            {% for poly in modifieds %}
+                            <tr>
+                                <td><strong>{{ poly.name }}</strong></td>
+                                <td>{{ poly.base_polymerase }}</td>
+                                <td><span class="badge bg-secondary">{{ poly.modification_type }}</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" 
+                                            title="Optimal Temp: {{ poly.optimal_temp }}°C&#13;Processivity: {{ poly.processivity }} bp&#13;pH: {{ poly.optimal_ph }}">
+                                        Properties
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href="{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fusion" class="data-section hidden">
+            <h2 class="section-header">Fusion Domains</h2>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Source</th>
+                                <th>Strain</th>
+                                <th>Length</th>
+                                <th>DOI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fusion-table-body">
+                            {% for domain in fusions %}
+                            <tr>
+                                <td><strong>{{ domain.name }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ domain.functional_type }}</span></td>
+                                <td>{{ domain.source_protein }}</td>
+                                <td>{{ domain.strain }}</td>
+                                <td>{{ domain.length }}</td>
+                                <td>
+                                    <a href="{{ domain.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Menu item click handling
+            $('.menu-item').click(function(e) {
+                e.preventDefault();
+                $('.menu-item').removeClass('active');
+                $(this).addClass('active');
+                $('.data-section').addClass('hidden');
+                $('#' + $(this).data('target')).removeClass('hidden');
+                $('#search').val(''); // Clear search when switching sections
+            });
+            
+            // Search functionality
+            $('#search').on('input', function() {
+                let searchTerm = $(this).val().toLowerCase();
+                $('.data-section:not(.hidden) tbody tr').each(function() {
+                    let rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.includes(searchTerm));
+                });
+            });
+        });
+    </script>
+</body>
+</html>
