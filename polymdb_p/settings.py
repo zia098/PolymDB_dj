@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -77,13 +77,20 @@ WSGI_APPLICATION = 'polymdb_p.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DB_NAME', 'PolymDB'),
+        'USER': os.environ.get('DB_USER', 'doadmin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'your_db_password'),
+        'HOST': os.environ.get('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com'),
+        'PORT': os.environ.get('DB_PORT', '25060'),
+        'OPTIONS': {
+            'ssl': {
+                'ca': os.environ.get('MYSQL_SSL_CA', '/path/to/ca-certificate.crt'),
+            },
+        },
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
