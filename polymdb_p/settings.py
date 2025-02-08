@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'polymdb_p.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"mysql://{os.getenv('DB_USER', 'doadmin')}:{os.getenv('DB_PASSWORD', '')}@{os.getenv('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com')}:{os.getenv('DB_PORT', '25060')}/{os.getenv('DB_NAME', 'PolymDB')}",
+        default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
         ssl_require=True
     )
