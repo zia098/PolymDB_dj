@@ -85,13 +85,13 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com'),
         'PORT': os.environ.get('DB_PORT', '25060'),
         'OPTIONS': {
+            # Make sure the path below points to the CA certificate you downloaded.
             'ssl': {
-                'ca': os.environ.get('MYSQL_SSL_CA', '/path/to/ca-certificate.crt'),
+                'ca': os.environ.get('MYSQL_SSL_CA', str(BASE_DIR / 'do-ca-certificate.crt')),
             },
         },
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
