@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,14 +79,16 @@ WSGI_APPLICATION = 'polymdb_p.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'PolymDB', 
-        'USER': 'root',  
-        'PASSWORD': 'z6622661.',  
-        'HOST': 'localhost',  
-        'PORT': '3306',  # Default MySQL port
+        'NAME': os.getenv('DB_NAME', 'PolymDB'),
+        'USER': os.getenv('DB_USER', 'doadmin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),  
+        'HOST': os.getenv('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com'),
+        'PORT': os.getenv('DB_PORT', '25060'),
+        'OPTIONS': {
+            'ssl': {'ssl-mode': 'REQUIRED'},  # Enforce SSL for DigitalOcean
+        },
     }
 }
-
 
 
 # Password validation
