@@ -77,17 +77,11 @@ WSGI_APPLICATION = 'polymdb_p.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'PolymDB'),
-        'USER': os.getenv('DB_USER', 'doadmin'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),  
-        'HOST': os.getenv('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com'),
-        'PORT': os.getenv('DB_PORT', '25060'),
-        'OPTIONS': {
-            'ssl': {'ssl-mode': 'REQUIRED'},  # Enforce SSL for DigitalOcean
-        },
-    }
+    'default': dj_database_url.config(
+        default=f"mysql://{os.getenv('DB_USER', 'doadmin')}:{os.getenv('DB_PASSWORD', '')}@{os.getenv('DB_HOST', 'mysql-polymdb-do-user-18955576-0.h.db.ondigitalocean.com')}:{os.getenv('DB_PORT', '25060')}/{os.getenv('DB_NAME', 'PolymDB')}",
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 
 
