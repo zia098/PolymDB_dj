@@ -39,10 +39,11 @@ class FusionDomain(models.Model):
     name = models.TextField(db_column="Domain Name")
     functional_type = models.TextField(db_column="Functional Type", null=True)
     source_protein = models.TextField(db_column="Source Protein", null=True)
-    strain = models.TextField(db_column="Strain", null=True)
+    strain = models.TextField(db_column="Strain", null=True) 
     length = models.IntegerField(db_column="Length", null=True)
+    sequence = models.TextField(db_column="Sequence (Amino Acid)", null=True) # 
+    Applications = models.TextField(db_column="Applications", null=True)
     doi = models.TextField(db_column="DOI", null=True)
 
     class Meta:
         db_table = "Fusion_Domains"
-
