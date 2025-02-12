@@ -6,6 +6,7 @@ class WildTypePolymerase(models.Model):
     source_strain = models.TextField(db_column="Source strain", null=True)
     family = models.TextField(db_column="Family", null=True)
     exo_activity = models.TextField(db_column="exo_activity_5_3", null=True)
+    sequence = models.TextField(db_column="sequence", null=True)
     doi = models.TextField(db_column="DOI", null=True) # this line is to add the DOI field to the model
   
 
@@ -27,6 +28,7 @@ class ModifiedPolymerase(models.Model):
     salt_tolerance_nacl = models.IntegerField(db_column="Salt_Tolerance_mM_NaCl", null=True)
     salt_tolerance_kcl = models.IntegerField(db_column="Salt_Tolerance_mM_KCI", null=True)
     activity = models.IntegerField(db_column="Activity", null=True)
+    sequence = models.TextField(db_column="Sequences", null=True)
     exo_activity_5_3 = models.TextField(db_column="exo_activity_5_3", null=True)
     enhanced_properties = models.TextField(db_column="Enhanced_Properties", null=True)
     doi = models.TextField(db_column="DOI", null=True)
