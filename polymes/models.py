@@ -49,3 +49,5 @@ class FusionDomain(models.Model):
 
     class Meta:
         db_table = "Fusion_Domains"
+
+
