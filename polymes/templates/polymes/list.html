@@ -180,7 +180,7 @@
             </thead>
             <tbody id="wild-table-body">
               {% for poly in wild_types %}
-              <tr>
+              <tr data-url="{% url 'wildtype_detail' poly.id %}">
                 <td><strong>{{ poly.name }}</strong></td>
                 <td>{{ poly.source_strain }}</td>
                 <td>
@@ -226,7 +226,8 @@
             </thead>
             <tbody id="modified-table-body">
               {% for poly in modifieds %}
-              <tr data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
+              <tr data-url="{% url 'modified_detail' poly.id %}"
+                  data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
                   data-activity="{{ poly.activity|default:'' }}"
                   data-processivity="{{ poly.processivity|default:'' }}"
                   data-base-polymerase="{{ poly.base_polymerase|default:'' }}"
@@ -306,7 +307,7 @@
             </thead>
             <tbody id="fusion-table-body">
               {% for domain in fusions %}
-              <tr>
+              <tr data-url="{% url 'domain_detail' domain.id %}">
                 <td><strong>{{ domain.name }}</strong></td>
                 <td>
                   <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
@@ -471,6 +472,13 @@
         var modalEl = document.getElementById('filterModal');
         var modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide();
+      });
+
+      // Make table rows clickable to navigate to their dedicated detail pages.
+      $('tbody tr[data-url]').css('cursor', 'pointer').on('click', function(e) {
+        // Avoid triggering if clicking on links or buttons within the row.
+        if ($(e.target).closest('a, button').length) return;
+        window.location = $(this).data('url');
       });
 
       // Show loading spinner during AJAX events (if applicable)
