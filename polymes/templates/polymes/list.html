@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load humanize %}
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -260,7 +261,7 @@
                               <strong>pH:</strong> {{ poly.optimal_ph }}{% if poly.ph_stability %} ({{ poly.ph_stability }}){% endif %}<br>
                             {% endif %}
                             {% if poly.activity %}
-                              <strong>Activity:</strong> {{ poly.activity }} U/mg<br>
+                              <strong>Activity:</strong> {{ poly.activity|floatformat:0|intcomma }} U/mg<br>
                             {% endif %}
                             {% if poly.Binding_Affinity_kd %}
                               <strong>Binding Affinity kd:</strong> {{ poly.Binding_Affinity_kd }} nM<br>
