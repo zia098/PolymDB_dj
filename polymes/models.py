@@ -31,6 +31,7 @@ class ModifiedPolymerase(models.Model):
     sequence = models.TextField(db_column="Sequences", null=True, blank=True)
     exo_activity_5_3 = models.TextField(db_column="exo_activity_5_3", null=True, blank=True)
     enhanced_properties = models.TextField(db_column="Enhanced_Properties", null=True, blank=True)
+    applications = models.TextField(db_column="Applications", null=True)
     doi = models.TextField(db_column="DOI", null=True, blank=True)
 
     class Meta:
