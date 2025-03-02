@@ -421,8 +421,8 @@
       function applyFilters() {
         var optimalTempMin = parseFloat($('#filter-optimal-temp-min').val());
         var optimalTempMax = parseFloat($('#filter-optimal-temp-max').val());
+        var meltingTempMin = parseFloat($('#filter-melting-temp-min').val()); // New
         var activityMin = parseFloat($('#filter-activity-min').val());
-        var processivityMin = parseFloat($('#filter-processivity-min').val());
         var basePolymeraseFilter = $('#filter-base-polymerase').val().toLowerCase();
         var modificationTypeFilter = $('#filter-modification-type').val().toLowerCase();
         
@@ -430,7 +430,7 @@
           var $row = $(this);
           var rowOptimalTemp = parseFloat($row.data('optimal-temp'));
           var rowActivity = parseFloat($row.data('activity'));
-          var rowProcessivity = parseFloat($row.data('processivity'));
+          var rowMeltingTemp = parseFloat($row.data('melting-temp')); // New
           var rowBasePolymerase = ($row.data('base-polymerase') || "").toString().toLowerCase();
           var rowModificationType = ($row.data('modification-type') || "").toString().toLowerCase();
           var showRow = true;
@@ -442,26 +442,31 @@
           if (!isNaN(optimalTempMax) && (isNaN(rowOptimalTemp) || rowOptimalTemp > optimalTempMax)) {
             showRow = false;
           }
+          
+          // Filter by melting temperature range (new)
+          if (!isNaN(meltingTempMin) && (isNaN(rowMeltingTemp) || rowMeltingTemp < meltingTempMin)) {
+            showRow = false;
+          }
+          
           // Filter by minimum activity
           if (!isNaN(activityMin) && (isNaN(rowActivity) || rowActivity < activityMin)) {
             showRow = false;
           }
-          // Filter by minimum processivity
-          if (!isNaN(processivityMin) && (isNaN(rowProcessivity) || rowProcessivity < processivityMin)) {
-            showRow = false;
-          }
+          
           // Filter by Base Polymerase substring (if provided)
           if (basePolymeraseFilter && !rowBasePolymerase.includes(basePolymeraseFilter)) {
             showRow = false;
           }
+          
           // Filter by Modification Type substring (if provided)
           if (modificationTypeFilter && !rowModificationType.includes(modificationTypeFilter)) {
             showRow = false;
           }
+          
           $row.toggle(showRow);
         });
       }
-      
+            
       // Apply filters and hide modal on click
       $('#apply-filter').click(function() {
         applyFilters();
