@@ -243,7 +243,11 @@
                     {{ poly.modification_type }}
                   </span>
                 </td>
-                <td>{{ poly.applications }}</td> 
+                <td>
+                  {% if poly.applications %}
+                    {{ poly.applications }}
+                  {% endif %}
+                </td> 
                 <td>
                   <button class="btn btn-sm properties-btn"
                           data-bs-toggle="tooltip"
