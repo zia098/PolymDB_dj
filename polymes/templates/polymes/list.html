@@ -178,7 +178,7 @@
                 <th>Source</th>
                 <th>Family</th>
                 <th>5'-3' Exo Activity</th>
-                <th>Links</th>
+                <th>References</th>
               </tr>
             </thead>
             <tbody id="wild-table-body">
@@ -223,8 +223,9 @@
                 <th>Name</th>
                 <th>Base Polymerase</th>
                 <th>Modification Type</th>
+                <th>Applications</th> 
                 <th>Properties</th>
-                <th>Links</th>
+                <th>References</th>
               </tr>
             </thead>
             <tbody id="modified-table-body">
@@ -242,6 +243,7 @@
                     {{ poly.modification_type }}
                   </span>
                 </td>
+                <td>{{ poly.applications }}</td> 
                 <td>
                   <button class="btn btn-sm properties-btn"
                           data-bs-toggle="tooltip"
