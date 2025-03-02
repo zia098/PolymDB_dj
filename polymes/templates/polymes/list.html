@@ -230,8 +230,8 @@
               {% for poly in modifieds %}
               <tr data-url="{% url 'modified_detail' poly.id %}"
                   data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
+                  data-melting-temp="{{ poly.melting_temp|default:'' }}"
                   data-activity="{{ poly.activity|default:'' }}"
-                  data-processivity="{{ poly.processivity|default:'' }}"
                   data-base-polymerase="{{ poly.base_polymerase|default:'' }}"
                   data-modification-type="{{ poly.modification_type|default:'' }}">
                 <td><strong>{{ poly.name }}</strong></td>
@@ -351,15 +351,19 @@
               <input type="number" class="form-control" id="filter-optimal-temp-max" placeholder="Max">
             </div>
           </div>
-          <!-- Activity -->
+          <!-- Melting Temperature -->
+          <div class="mb-3">
+            <label class="form-label">Melting Temperature Range (°C)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="filter-melting-temp-min" placeholder="Min">
+              <span class="input-group-text">-</span>
+    
+            </div>
+          </div>
+           <!-- Activity -->
           <div class="mb-3">
             <label for="filter-activity-min" class="form-label">Activity (min U/mg)</label>
             <input type="number" class="form-control" id="filter-activity-min" placeholder="e.g., 10">
-          </div>
-          <!-- Processivity -->
-          <div class="mb-3">
-            <label for="filter-processivity-min" class="form-label">Processivity (min bp)</label>
-            <input type="number" class="form-control" id="filter-processivity-min" placeholder="e.g., 500">
           </div>
           <!-- Base Polymerase -->
           <div class="mb-3">
