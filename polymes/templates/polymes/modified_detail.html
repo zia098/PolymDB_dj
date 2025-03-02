@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load humanize %}
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -117,7 +118,7 @@
             {% if polymerase.activity %}
             <div class="property-item">
               <span class="property-label">Activity:</span>
-              <div>{{ polymerase.activity }} U/mg</div>
+              <div>{{ polymerase.activity|floatformat:0|intcomma }} U/mg</div>
             </div>
             {% endif %}
             {% if polymerase.binding_affinity %}
