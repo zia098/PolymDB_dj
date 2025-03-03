@@ -7,7 +7,10 @@ class WildTypePolymerase(models.Model):
     family = models.TextField(db_column="Family", null=True, blank=True)
     exo_activity = models.TextField(db_column="exo_activity_5_3", null=True, blank=True)
     sequence = models.TextField(db_column="sequence", null=True, blank=True)
-    doi = models.TextField(db_column="DOI", null=True, blank=True) 
+    doi = models.TextField(db_column="DOI", null=True, blank=True)
+    genbank = models.TextField(db_column="GenBank", null=True)
+    uniprot = models.TextField(db_column="UniProt", null=True)
+    PDB = models.TextField(db_column="PDB", null=True)
   
 
     class Meta:
@@ -32,6 +35,9 @@ class ModifiedPolymerase(models.Model):
     exo_activity_5_3 = models.TextField(db_column="exo_activity_5_3", null=True, blank=True)
     enhanced_properties = models.TextField(db_column="Enhanced_Properties", null=True, blank=True)
     applications = models.TextField(db_column="Applications", null=True)
+    genbank = models.TextField(db_column="GenBank", null=True)
+    uniprot = models.TextField(db_column="UniProt", null=True)
+    PDB = models.TextField(db_column="PDB", null=True)
     doi = models.TextField(db_column="DOI", null=True, blank=True)
 
     class Meta:
