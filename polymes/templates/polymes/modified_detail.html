@@ -42,6 +42,18 @@
       font-weight: 600;
       color: var(--primary-color);
     }
+    
+    .external-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--secondary-color);
+      text-decoration: none;
+    }
+    
+    .external-link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -63,22 +75,51 @@
             <h5 class="mb-0">Basic Information</h5>
           </div>
           <div class="card-body">
+            {% if polymerase.base_polymerase %}
             <div class="property-item">
               <span class="property-label">Base Polymerase:</span>
               <div>{{ polymerase.base_polymerase }}</div>
             </div>
+            {% endif %}
+            
+            {% if polymerase.modification_type %}
             <div class="property-item">
               <span class="property-label">Modification Type:</span>
               <div>{{ polymerase.modification_type }}</div>
             </div>
+            {% endif %}
+            
+            {% if polymerase.modifications and polymerase.modifications != "None" %}
             <div class="property-item">
               <span class="property-label">Modifications:</span>
               <div>{{ polymerase.modifications }}</div>
             </div>
+            {% endif %}
+            
+            {% if polymerase.applications and polymerase.applications != "None" %}
             <div class="property-item">
               <span class="property-label">Application:</span>
               <div>{{ polymerase.applications }}</div>
-            </div>  
+            </div>
+            {% endif %}
+            
+            {% if polymerase.exo_activity_5_3 and polymerase.exo_activity_5_3 != "None" %}
+            <div class="property-item">
+              <span class="property-label">5'-3' Exonuclease Activity:</span>
+              <div>{{ polymerase.exo_activity_5_3 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if polymerase.exo_activity_3_5 and polymerase.exo_activity_3_5 != "None" %}
+            <div class="property-item">
+              <span class="property-label">3'-5' Exonuclease Activity:</span>
+              <div>{{ polymerase.exo_activity_3_5 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if not polymerase.base_polymerase and not polymerase.modification_type and not polymerase.modifications and not polymerase.applications and not polymerase.exo_activity_5_3 and not polymerase.exo_activity_3_5 %}
+            <p>No basic information available.</p>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -90,80 +131,149 @@
             <h5 class="mb-0">Properties</h5>
           </div>
           <div class="card-body">
-            {% if polymerase.optimal_temp %}
-            <div class="property-item">
-              <span class="property-label">Optimal Temperature:</span>
-              <div>{{ polymerase.optimal_temp }}°C</div>
-            </div>
-            {% endif %}
-            {% if polymerase.melting_temp %}
-            <div class="property-item">
-              <span class="property-label">Melting Temperature:</span>
-              <div>{{ polymerase.melting_temp }}°C</div>
-            </div>
-            {% endif %}
-            {% if polymerase.processivity %}
-            <div class="property-item">
-              <span class="property-label">Processivity:</span>
-              <div>{{ polymerase.processivity }} bp</div>
-            </div>
-            {% endif %}
-            {% if polymerase.optimal_ph %}
-            <div class="property-item">
-              <span class="property-label">Optimal pH:</span>
-              <div>
-                {{ polymerase.optimal_ph }}
-                {% if polymerase.ph_stability %}
-                  ({{ polymerase.ph_stability }})
+            {% if polymerase.optimal_temp or polymerase.melting_temp or polymerase.processivity or polymerase.optimal_ph or polymerase.activity or polymerase.binding_affinity or polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl %}
+              {% if polymerase.optimal_temp %}
+              <div class="property-item">
+                <span class="property-label">Optimal Temperature:</span>
+                <div>{{ polymerase.optimal_temp }}°C</div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.melting_temp %}
+              <div class="property-item">
+                <span class="property-label">Melting Temperature:</span>
+                <div>{{ polymerase.melting_temp }}°C</div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.processivity %}
+              <div class="property-item">
+                <span class="property-label">Processivity:</span>
+                <div>{{ polymerase.processivity }} bp</div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.optimal_ph %}
+              <div class="property-item">
+                <span class="property-label">Optimal pH:</span>
+                <div>
+                  {{ polymerase.optimal_ph }}
+                  {% if polymerase.ph_stability %}
+                    ({{ polymerase.ph_stability }})
+                  {% endif %}
+                </div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.activity %}
+              <div class="property-item">
+                <span class="property-label">Activity:</span>
+                <div>{{ polymerase.activity|floatformat:0|intcomma }} U/mg</div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.binding_affinity %}
+              <div class="property-item">
+                <span class="property-label">Binding Affinity kd:</span>
+                <div>{{ polymerase.binding_affinity }} nM</div>
+              </div>
+              {% endif %}
+              
+              {% if polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl %}
+              <div class="property-item">
+                <span class="property-label">Salt Tolerance:</span>
+                {% if polymerase.salt_tolerance_nacl %}
+                <div>NaCl: {{ polymerase.salt_tolerance_nacl }} mM</div>
+                {% endif %}
+                {% if polymerase.salt_tolerance_kcl %}
+                <div>KCl: {{ polymerase.salt_tolerance_kcl }} mM</div>
                 {% endif %}
               </div>
-            </div>
-            {% endif %}
-            {% if polymerase.activity %}
-            <div class="property-item">
-              <span class="property-label">Activity:</span>
-              <div>{{ polymerase.activity|floatformat:0|intcomma }} U/mg</div>
-            </div>
-            {% endif %}
-            {% if polymerase.binding_affinity %}
-            <div class="property-item">
-              <span class="property-label">Binding Affinity kd:</span>
-              <div>{{ polymerase.binding_affinity }} nM</div>
-            </div>
-            {% endif %}
-            {% if polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl %}
-            <div class="property-item">
-              <span class="property-label">Salt Tolerance:</span>
-              {% if polymerase.salt_tolerance_nacl %}
-              <div>NaCl: {{ polymerase.salt_tolerance_nacl }} mM</div>
               {% endif %}
-              {% if polymerase.salt_tolerance_kcl %}
-              <div>KCl: {{ polymerase.salt_tolerance_kcl }} mM</div>
-              {% endif %}
-            </div>
+            {% else %}
+              <p>No detailed properties available.</p>
             {% endif %}
           </div>
         </div>
       </div>
     </div>
 
-
-
-      <!-- Sequence Section -->
-      <div class="card mb-4">
-        <div class="card-header">
-          <h5 class="mb-0">sequence </h5>
+    <!-- Reference & External IDs Section -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">References & External Database IDs</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            {% if polymerase.doi %}
+            <div class="property-item">
+              <span class="property-label">Publication:</span>
+              <div>
+                <a href="https://doi.org/{{ polymerase.doi }}" target="_blank" class="external-link">
+                  <i class="fas fa-external-link-alt"></i> {{ polymerase.doi }}
+                </a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            {% if polymerase.genbank and polymerase.genbank != "None" %}
+            <div class="property-item">
+              <span class="property-label">GenBank:</span>
+              <div>
+                <a href="https://www.ncbi.nlm.nih.gov/nuccore/{{ polymerase.genbank }}" target="_blank" class="external-link">
+                  <i class="fas fa-database"></i> {{ polymerase.genbank }}
+                </a>
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if polymerase.uniprot and polymerase.uniprot != "None" %}
+            <div class="property-item">
+              <span class="property-label">UniProt:</span>
+              <div>
+                <a href="https://www.uniprot.org/uniprot/{{ polymerase.uniprot }}" target="_blank" class="external-link">
+                  <i class="fas fa-database"></i> {{ polymerase.uniprot }}
+                </a>
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if polymerase.PDB and polymerase.PDB != "None" %}
+            <div class="property-item">
+              <span class="property-label">PDB:</span>
+              <div>
+                <a href="https://www.rcsb.org/structure/{{ polymerase.PDB }}" target="_blank" class="external-link">
+                  <i class="fas fa-cube"></i> {{ polymerase.PDB }}
+                </a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
         </div>
-        <div class="card-body">
-          {% if polymerase.sequence %}
-            <pre>{{ polymerase.sequence}}</pre>
-          {% else %}
-            <p>Sequence not available.</p>
-          {% endif %}
-        </div>
+        
+        {% if not polymerase.doi and not polymerase.genbank and not polymerase.uniprot and not polymerase.PDB %}
+        <p>No reference information available.</p>
+        {% endif %}
       </div>
     </div>
-  
+
+    <!-- Sequence Section -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Sequence</h5>
+      </div>
+      <div class="card-body">
+        {% if polymerase.sequence %}
+          <pre>{{ polymerase.sequence }}</pre>
+        {% else %}
+          <p>Sequence not available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
