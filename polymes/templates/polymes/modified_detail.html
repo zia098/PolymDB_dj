@@ -131,7 +131,7 @@
             <h5 class="mb-0">Properties</h5>
           </div>
           <div class="card-body">
-            {% if polymerase.optimal_temp or polymerase.melting_temp or polymerase.processivity or polymerase.optimal_ph or polymerase.activity or polymerase.binding_affinity or polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl %}
+            {% if polymerase.optimal_temp or polymerase.melting_temp or polymerase.processivity or polymerase.optimal_ph or polymerase.activity or polymerase.binding_affinity or polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl or polymerase.enhanced_properties %}
               {% if polymerase.optimal_temp %}
               <div class="property-item">
                 <span class="property-label">Optimal Temperature:</span>
@@ -192,6 +192,13 @@
               {% endif %}
             {% else %}
               <p>No detailed properties available.</p>
+            {% endif %}
+
+            {% if polymerase.enhanced_properties and polymerase.enhanced_properties != "None" %}
+            <div class="property-item">
+              <span class="property-label">Enhanced Properties:</span>
+              <div>{{ polymerase.enhanced_properties }}</div>
+            </div>
             {% endif %}
           </div>
         </div>
