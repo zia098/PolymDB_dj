@@ -267,16 +267,16 @@
       </div>
     </div>
 
-    <!-- Sequence Section -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <h5 class="mb-0">Sequence</h5>
-      </div>
-      <div class="card-body">
         {% if polymerase.sequence %}
-          <pre>{{ polymerase.sequence }}</pre>
-        {% else %}
-          <p></p>
+        <!-- Sequence Section -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Sequence</h5>
+          </div>
+          <div class="card-body">
+            <pre>{{ polymerase.sequence }}</pre>
+          </div>
+        </div>
         {% endif %}
       </div>
     </div>
