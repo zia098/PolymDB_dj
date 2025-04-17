@@ -4,6 +4,27 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from .models import WildTypePolymerase, ModifiedPolymerase, FusionDomain
 
+def get_page_range(paginator, page, window=2):
+    """Return a limited page range like [1, '...', 4,5,6, '...', total]."""
+    current = page.number
+    total   = paginator.num_pages
+
+    start = max(current - window, 1)
+    end   = min(current + window, total)
+
+    rng = []
+    if start > 1:
+        rng.append(1)
+        if start > 2:
+            rng.append('...')
+    rng.extend(range(start, end+1))
+    if end < total:
+        if end < total - 1:
+            rng.append('...')
+        rng.append(total)
+    return rng
+
+
 def polymerase_list(request):
     # Fetch and order each queryset
     wild_qs     = WildTypePolymerase.objects.all().order_by('name')
