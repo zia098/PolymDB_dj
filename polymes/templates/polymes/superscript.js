@@ -3,9 +3,9 @@
  * For display in the PolymDB application
  */
 document.addEventListener('DOMContentLoaded', function() {
-  // Find all elements that might contain caret notation
-  // Added strong, th, and a elements to catch polymerase names in tables and links
-  const elements = document.querySelectorAll('.property-item div, pre, p, span, td, strong, th, a, h1, h2, h3, h4, h5');
+  // Find elements containing text in the entire document
+  // Most comprehensive selector to catch all possible text-containing elements
+  const elements = document.querySelectorAll('*');
   
   // Mapping of regular characters to their Unicode superscript equivalents
   const superscriptMap = {
@@ -30,27 +30,26 @@ document.addEventListener('DOMContentLoaded', function() {
     'T': 'ᵀ', 'U': 'ᵁ', 'V': 'ⱽ', 'W': 'ᵂ'
   };
   
-  elements.forEach(function(element) {
-    // Get the current HTML content
-    let html = element.innerHTML;
+  // Function to process text nodes
+  function processTextNode(textNode) {
+    const text = textNode.nodeValue;
     
-    // Use regex to find patterns like "anything^anything"
-    // Updated pattern to better handle complex cases
-    html = html.replace(/(\S+)\^(\S+)/g, function(match, base, exp) {
+    // Skip empty nodes and nodes without the caret symbol
+    if (!text || !text.includes('^')) return;
+    
+    // Use regex to find all instances of caret notation
+    const newText = text.replace(/(\S+)\^(\S+)/g, function(match, base, exp) {
       let superscript = '';
       
-      // Convert each character in the exponent to its superscript equivalent if available
       for (let i = 0; i < exp.length; i++) {
         const char = exp[i];
-        
         if (superscriptMap[char]) {
-          // Use Unicode superscript if available
           superscript += superscriptMap[char];
         } else if (char.toUpperCase() === char && /[A-Z]/.test(char)) {
-          // For uppercase letters without Unicode superscripts, use HTML tags
-          superscript += '<sup>' + char + '</sup>';
+          // For uppercase letters without Unicode superscripts, we keep them as is
+          // since we can't add HTML tags to text nodes
+          superscript += char;
         } else {
-          // For any other characters without superscript versions
           superscript += char;
         }
       }
@@ -58,7 +57,65 @@ document.addEventListener('DOMContentLoaded', function() {
       return base + superscript;
     });
     
-    // Update the element with the converted content
-    element.innerHTML = html;
+    if (text !== newText) {
+      textNode.nodeValue = newText;
+    }
+  }
+  
+  // Process all text nodes in the document
+  function walkTextNodes(node) {
+    if (node.nodeType === 3) { // Text node
+      processTextNode(node);
+      return;
+    }
+    
+    // Skip script and style elements
+    if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') {
+      return;
+    }
+    
+    // Process child nodes
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+      walkTextNodes(children[i]);
+    }
+  }
+  
+  // Start processing from the body
+  walkTextNodes(document.body);
+  
+  // Also handle HTML content for more complex cases
+  elements.forEach(function(element) {
+    // Skip certain elements
+    if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE' || 
+        element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+      return;
+    }
+    
+    if (element.innerHTML && element.innerHTML.includes('^')) {
+      const html = element.innerHTML;
+      
+      // More specific pattern to catch cases like (T7^rep-7)
+      const newHtml = html.replace(/\b([A-Za-z0-9]+)\^([A-Za-z0-9\-]+)\b/g, function(match, base, exp) {
+        let superscript = '';
+        
+        for (let i = 0; i < exp.length; i++) {
+          const char = exp[i];
+          if (superscriptMap[char]) {
+            superscript += superscriptMap[char];
+          } else if (char.toUpperCase() === char && /[A-Z]/.test(char)) {
+            superscript += '<sup>' + char + '</sup>';
+          } else {
+            superscript += char;
+          }
+        }
+        
+        return base + superscript;
+      });
+      
+      if (html !== newHtml) {
+        element.innerHTML = newHtml;
+      }
+    }
   });
 });
