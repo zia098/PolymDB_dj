@@ -10,23 +10,31 @@ def polymerase_list(request):
     modified_qs = ModifiedPolymerase.objects.all().order_by('name')
     fusion_qs   = FusionDomain.objects.all().order_by('name')
 
-    # Paginate each: 10 items per page
+    # Paginate each: 20 items per page
     wild_paginator     = Paginator(wild_qs, 20)
     modified_paginator = Paginator(modified_qs, 20)
     fusion_paginator   = Paginator(fusion_qs, 20)
 
     # Get the current page numbers from query params
-    wild_page     = request.GET.get('wild_page')
-    modified_page = request.GET.get('mod_page')
-    fusion_page   = request.GET.get('fusion_page')
+    wild_page     = request.GET.get('wild_page', 1)
+    modified_page = request.GET.get('mod_page', 1)
+    fusion_page   = request.GET.get('fusion_page', 1)
+    
+    # Get the page objects
+    wild_page_obj = wild_paginator.get_page(wild_page)
+    modified_page_obj = modified_paginator.get_page(modified_page)
+    fusion_page_obj = fusion_paginator.get_page(fusion_page)
 
     context = {
-        'wild_types': wild_paginator.get_page(wild_page),
-        'modifieds' : modified_paginator.get_page(modified_page),
-        'fusions'   : fusion_paginator.get_page(fusion_page),
+        'wild_types': wild_page_obj,
+        'modifieds': modified_page_obj,
+        'fusions': fusion_page_obj,
+        'wild_page_range': get_page_range(wild_paginator, wild_page_obj),
+        'modified_page_range': get_page_range(modified_paginator, modified_page_obj),
+        'fusion_page_range': get_page_range(fusion_paginator, fusion_page_obj),
     }
     return render(request, 'polymes/list.html', context)
-
+    
 def wildtype_detail(request, pk):
     polymerase = get_object_or_404(WildTypePolymerase, pk=pk)
     return render(request, 'polymes/wildtype_detail.html', {'polymerase': polymerase})
