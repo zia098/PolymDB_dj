@@ -38,3 +38,29 @@ def modified_detail(request, pk):
 def domain_detail(request, pk):
     domain = get_object_or_404(FusionDomain, pk=pk)
     return render(request, 'polymes/domain_detail.html', {'domain': domain})
+
+# Add this to your views.py file
+def get_page_range(paginator, page, window=2):
+    """Return a limited page range around the current page."""
+    current_page = page.number
+    total_pages = paginator.num_pages
+    
+    # Start with a window around current page
+    start = max(current_page - window, 1)
+    end = min(current_page + window, total_pages)
+    
+    # Add first and last pages if they're not already included
+    page_range = []
+    if start > 1:
+        page_range.extend([1])
+        if start > 2:
+            page_range.extend(['...'])
+    
+    page_range.extend(range(start, end + 1))
+    
+    if end < total_pages:
+        if end < total_pages - 1:
+            page_range.extend(['...'])
+        page_range.extend([total_pages])
+    
+    return page_range
