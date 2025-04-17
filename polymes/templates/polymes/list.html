@@ -140,21 +140,20 @@
       background: var(--secondary-color);
       border-radius: 4px;
     }
-        display: none !important;
-  }
-  
-/* Hide any unexpected pagination elements */
-#modified > .pagination:first-child,
-#modified > nav.pagination:first-child,
-#modified > ul.pagination:first-child,
-#modified > div > .pagination:first-child {
-  display: none !important;
-}
+    
+    /* Hide any unexpected pagination elements */
+    #modified > .pagination:first-child,
+    #modified > nav.pagination:first-child,
+    #modified > ul.pagination:first-child,
+    #modified > div > .pagination:first-child {
+      display: none !important;
+    }
 
-/* Only show pagination at the bottom after the table */
-nav[aria-label="Modified pagination"] {
-  display: block !important;
-}
+    /* Only show pagination at the bottom after the table */
+    nav[aria-label="Modified pagination"] {
+      display: block !important;
+    }
+
   </style>
 </head>
 <body>
