@@ -348,7 +348,7 @@
   <ul class="pagination justify-content-center">
     {% if modifieds.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}#modified">Previous</a>
+        <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}#modified">Previous</a>
       </li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Previous</span></li>
@@ -361,14 +361,14 @@
         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
       {% else %}
         <li class="page-item">
-          <a class="page-link" href="?mod_page={{ num }}#modified">{{ num }}</a>
+          <a class="page-link" href="?mod_page={{ num }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}#modified">{{ num }}</a>
         </li>
       {% endif %}
     {% endfor %}
 
     {% if modifieds.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}#modified">Next</a>
+        <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}#modified">Next</a>
       </li>
     {% else %}
       <li class="page-item disabled"><span class="page-link">Next</span></li>
@@ -435,34 +435,33 @@
           <div class="mb-3">
             <label class="form-label">Optimal Temperature Range (°C)</label>
             <div class="input-group">
-              <input type="number" class="form-control" id="filter-optimal-temp-min" placeholder="Min">
+              <input type="number" class="form-control" id="filter-optimal-temp-min" placeholder="Min" value="{{ filter_params.opt_temp_min }}">
               <span class="input-group-text">-</span>
-              <input type="number" class="form-control" id="filter-optimal-temp-max" placeholder="Max">
+              <input type="number" class="form-control" id="filter-optimal-temp-max" placeholder="Max" value="{{ filter_params.opt_temp_max }}">
             </div>
           </div>
           <!-- Melting Temperature -->
           <div class="mb-3">
             <label class="form-label">Melting Temperature Range (°C)</label>
             <div class="input-group">
-              <input type="number" class="form-control" id="filter-melting-temp-min" placeholder="Min">
+              <input type="number" class="form-control" id="filter-melting-temp-min" placeholder="Min" value="{{ filter_params.melt_temp_min }}">
               <span class="input-group-text">-</span>
-    
             </div>
           </div>
            <!-- Activity -->
           <div class="mb-3">
             <label for="filter-activity-min" class="form-label">Activity (min U/mg)</label>
-            <input type="number" class="form-control" id="filter-activity-min" placeholder="e.g., 10">
+            <input type="number" class="form-control" id="filter-activity-min" placeholder="e.g., 10" value="{{ filter_params.activity_min }}">
           </div>
           <!-- Base Polymerase -->
           <div class="mb-3">
             <label for="filter-base-polymerase" class="form-label">Base Polymerase</label>
-            <input type="text" class="form-control" id="filter-base-polymerase" placeholder="Type to filter">
+            <input type="text" class="form-control" id="filter-base-polymerase" placeholder="Type to filter" value="{{ filter_params.base_poly }}">
           </div>
           <!-- Modification Type -->
           <div class="mb-3">
             <label for="filter-modification-type" class="form-label">Modification Type</label>
-            <input type="text" class="form-control" id="filter-modification-type" placeholder="Type to filter">
+            <input type="text" class="form-control" id="filter-modification-type" placeholder="Type to filter" value="{{ filter_params.mod_type }}">
           </div>
         </div>
         <div class="modal-footer">
@@ -482,18 +481,18 @@
   <script>
     $(document).ready(function() {
       // Check for hash in URL and activate the corresponding tab
-(function() {
-  const hash = window.location.hash.substring(1);
-  const valid = $('.menu-item[data-target="' + hash + '"]').length > 0;
-  const target = valid ? hash : 'wild-type';
+      (function() {
+        const hash = window.location.hash.substring(1);
+        const valid = $('.menu-item[data-target="' + hash + '"]').length > 0;
+        const target = valid ? hash : 'wild-type';
 
-  $('.menu-item').removeClass('active');
-  $('.menu-item[data-target="' + target + '"]').addClass('active');
-  $('.data-section').addClass('d-none');
-  $('#' + target).removeClass('d-none');
-  // update URL so pagination links keep the right hash
-  history.replaceState(null, '', '#' + target);
-})();
+        $('.menu-item').removeClass('active');
+        $('.menu-item[data-target="' + target + '"]').addClass('active');
+        $('.data-section').addClass('d-none');
+        $('#' + target).removeClass('d-none');
+        // update URL so pagination links keep the right hash
+        history.replaceState(null, '', '#' + target);
+      })();
 
       // Initialize Bootstrap tooltips
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -520,72 +519,75 @@
         });
       });
 
-      // Function to apply numeric and text filters in the Modified Polymerases table
-      function applyFilters() {
-        var optimalTempMin = parseFloat($('#filter-optimal-temp-min').val());
-        var optimalTempMax = parseFloat($('#filter-optimal-temp-max').val());
-        var meltingTempMin = parseFloat($('#filter-melting-temp-min').val()); // New
-        var activityMin = parseFloat($('#filter-activity-min').val());
-        var basePolymeraseFilter = $('#filter-base-polymerase').val().toLowerCase();
-        var modificationTypeFilter = $('#filter-modification-type').val().toLowerCase();
-        
-        $('#modified-table-body tr').each(function() {
-          var $row = $(this);
-          var rowOptimalTemp = parseFloat($row.data('optimal-temp'));
-          var rowActivity = parseFloat($row.data('activity'));
-          var rowMeltingTemp = parseFloat($row.data('melting-temp')); // New
-          var rowBasePolymerase = ($row.data('base-polymerase') || "").toString().toLowerCase();
-          var rowModificationType = ($row.data('modification-type') || "").toString().toLowerCase();
-          var showRow = true;
-          
-          // Filter by optimal temperature range
-          if (!isNaN(optimalTempMin) && (isNaN(rowOptimalTemp) || rowOptimalTemp < optimalTempMin)) {
-            showRow = false;
-          }
-          if (!isNaN(optimalTempMax) && (isNaN(rowOptimalTemp) || rowOptimalTemp > optimalTempMax)) {
-            showRow = false;
-          }
-          
-          // Filter by melting temperature range (new)
-          if (!isNaN(meltingTempMin) && (isNaN(rowMeltingTemp) || rowMeltingTemp < meltingTempMin)) {
-            showRow = false;
-          }
-          
-          // Filter by minimum activity
-          if (!isNaN(activityMin) && (isNaN(rowActivity) || rowActivity < activityMin)) {
-            showRow = false;
-          }
-          
-          // Filter by Base Polymerase substring (if provided)
-          if (basePolymeraseFilter && !rowBasePolymerase.includes(basePolymeraseFilter)) {
-            showRow = false;
-          }
-          
-          // Filter by Modification Type substring (if provided)
-          if (modificationTypeFilter && !rowModificationType.includes(modificationTypeFilter)) {
-            showRow = false;
-          }
-          
-          $row.toggle(showRow);
-        });
-      }
-            
-      // Apply filters and hide modal on click
+      // Apply filters and submit the form
       $('#apply-filter').click(function() {
-        applyFilters();
-        // Hide the modal after applying filters
-        var modalEl = document.getElementById('filterModal');
-        var modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        var currentUrl = new URL(window.location.href);
+        var params = currentUrl.searchParams;
+        
+        // Clear existing filter params
+        params.delete('opt_temp_min');
+        params.delete('opt_temp_max');
+        params.delete('melt_temp_min');
+        params.delete('activity_min');
+        params.delete('base_poly');
+        params.delete('mod_type');
+        
+        // Add new filter params
+        var optTempMin = $('#filter-optimal-temp-min').val();
+        if (optTempMin) params.set('opt_temp_min', optTempMin);
+        
+        var optTempMax = $('#filter-optimal-temp-max').val();
+        if (optTempMax) params.set('opt_temp_max', optTempMax);
+        
+        var meltTempMin = $('#filter-melting-temp-min').val();
+        if (meltTempMin) params.set('melt_temp_min', meltTempMin);
+        
+        var activityMin = $('#filter-activity-min').val();
+        if (activityMin) params.set('activity_min', activityMin);
+        
+        var basePolymerase = $('#filter-base-polymerase').val();
+        if (basePolymerase) params.set('base_poly', basePolymerase);
+        
+        var modificationType = $('#filter-modification-type').val();
+        if (modificationType) params.set('mod_type', modificationType);
+        
+        // Ensure we're on page 1 with the new filters
+        params.set('mod_page', 1);
+        
+        // Preserve the hash for the tab
+        currentUrl.search = params.toString();
+        var newUrl = currentUrl.toString();
+        if (!newUrl.includes('#')) {
+          newUrl += '#modified';
+        }
+        
+        // Navigate to the new URL
+        window.location.href = newUrl;
       });
 
-      // Clear filters, reset inputs, and show all rows; also hide modal
+      // Clear filters by removing all filter params
       $('#clear-filter').click(function() {
-        $('#filterModal input').val('');
-        $('#modified-table-body tr').show();
-        var modalEl = document.getElementById('filterModal');
-        var modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        var currentUrl = new URL(window.location.href);
+        var params = currentUrl.searchParams;
+        
+        params.delete('opt_temp_min');
+        params.delete('opt_temp_max');
+        params.delete('melt_temp_min');
+        params.delete('activity_min');
+        params.delete('base_poly');
+        params.delete('mod_type');
+        
+        // Reset to page 1
+        params.set('mod_page', 1);
+        
+        // Preserve the hash for the tab
+        currentUrl.search = params.toString();
+        var newUrl = currentUrl.toString();
+        if (!newUrl.includes('#')) {
+          newUrl += '#modified';
+        }
+        
+        window.location.href = newUrl;
       });
 
       // Make table rows clickable to navigate to their dedicated detail pages.
@@ -594,6 +596,13 @@
         if ($(e.target).closest('a, button').length) return;
         window.location = $(this).data('url');
       });
+
+      // Hide any unexpected pagination elements
+      setTimeout(function() {
+        $('#modified > nav:not([aria-label="Modified pagination"])').remove();
+        $('#modified > div > nav:not([aria-label="Modified pagination"])').remove();
+        $('#modified > ul.pagination').remove();
+      }, 100);
 
       // Show loading spinner during AJAX events (if applicable)
       $(document).ajaxStart(function() {
@@ -604,7 +613,5 @@
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
 </body>
 </html>
