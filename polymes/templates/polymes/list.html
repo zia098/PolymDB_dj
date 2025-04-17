@@ -140,6 +140,14 @@
       background: var(--secondary-color);
       border-radius: 4px;
     }
+        display: none !important;
+  }
+  
+  /* Alternative approach if the above doesn't work */
+  #modified > .pagination,
+  #modified > nav:not([aria-label="Modified pagination"]) {
+    display: none !important;
+  }
   </style>
 </head>
 <body>
