@@ -138,7 +138,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where collectst
 
 #STATIC_ROOT = BASE_DIR / "staticfiles"  # Directory where collectstatic gathers all static files
 
-STATICFILES_DIRS = [BASE_DIR / "static"]  # Folder for your app's static files
+#STATICFILES_DIRS = [BASE_DIR / "static"]  # Folder for your app's static files
+STATICFILES_DIRS = [BASE_DIR / "staticfiles"]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
