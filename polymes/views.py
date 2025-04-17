@@ -11,9 +11,9 @@ def polymerase_list(request):
     fusion_qs   = FusionDomain.objects.all().order_by('name')
 
     # Paginate each: 10 items per page
-    wild_paginator     = Paginator(wild_qs, 10)
-    modified_paginator = Paginator(modified_qs, 10)
-    fusion_paginator   = Paginator(fusion_qs, 10)
+    wild_paginator     = Paginator(wild_qs, 20)
+    modified_paginator = Paginator(modified_qs, 20)
+    fusion_paginator   = Paginator(fusion_qs, 20)
 
     # Get the current page numbers from query params
     wild_page     = request.GET.get('wild_page')
