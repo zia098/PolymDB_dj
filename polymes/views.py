@@ -27,24 +27,56 @@ def get_page_range(paginator, page, window=2):
 
 def polymerase_list(request):
     # Fetch and order each queryset
-    wild_qs     = WildTypePolymerase.objects.all().order_by('name')
+    wild_qs = WildTypePolymerase.objects.all().order_by('name')
     modified_qs = ModifiedPolymerase.objects.all().order_by('name')
-    fusion_qs   = FusionDomain.objects.all().order_by('name')
-
-    # Paginate each: 20 items per page
-    wild_paginator     = Paginator(wild_qs, 20)
-    modified_paginator = Paginator(modified_qs, 20)
-    fusion_paginator   = Paginator(fusion_qs, 20)
-
-    # Get the current page numbers from query params
-    wild_page     = request.GET.get('wild_page', 1)
-    modified_page = request.GET.get('mod_page', 1)
-    fusion_page   = request.GET.get('fusion_page', 1)
+    fusion_qs = FusionDomain.objects.all().order_by('name')
     
-    # Get the page objects
+    # Apply filters to modified polymerases
+    opt_temp_min = request.GET.get('opt_temp_min')
+    opt_temp_max = request.GET.get('opt_temp_max')
+    melt_temp_min = request.GET.get('melt_temp_min')
+    activity_min = request.GET.get('activity_min')
+    base_poly = request.GET.get('base_poly')
+    mod_type = request.GET.get('mod_type')
+    
+    # Filter the modified_qs based on parameters
+    if opt_temp_min:
+        modified_qs = modified_qs.filter(optimal_temp__gte=float(opt_temp_min))
+    if opt_temp_max:
+        modified_qs = modified_qs.filter(optimal_temp__lte=float(opt_temp_max))
+    if melt_temp_min:
+        modified_qs = modified_qs.filter(melting_temp__gte=float(melt_temp_min))
+    if activity_min:
+        modified_qs = modified_qs.filter(activity__gte=float(activity_min))
+    if base_poly:
+        modified_qs = modified_qs.filter(base_polymerase__icontains=base_poly)
+    if mod_type:
+        modified_qs = modified_qs.filter(modification_type__icontains=mod_type)
+    
+    # Paginate each
+    wild_paginator = Paginator(wild_qs, 20)
+    modified_paginator = Paginator(modified_qs, 20)
+    fusion_paginator = Paginator(fusion_qs, 20)
+
+    # Get the current page numbers
+    wild_page = request.GET.get('wild_page', 1)
+    modified_page = request.GET.get('mod_page', 1)
+    fusion_page = request.GET.get('fusion_page', 1)
+    
+    # Get page objects
     wild_page_obj = wild_paginator.get_page(wild_page)
     modified_page_obj = modified_paginator.get_page(modified_page)
     fusion_page_obj = fusion_paginator.get_page(fusion_page)
+    
+    # Pass active filter values to template
+    filter_params = {
+        'opt_temp_min': opt_temp_min or '',
+        'opt_temp_max': opt_temp_max or '',
+        'melt_temp_min': melt_temp_min or '',
+        'activity_min': activity_min or '',
+        'base_poly': base_poly or '',
+        'mod_type': mod_type or '',
+    }
 
     context = {
         'wild_types': wild_page_obj,
@@ -53,6 +85,7 @@ def polymerase_list(request):
         'wild_page_range': get_page_range(wild_paginator, wild_page_obj),
         'modified_page_range': get_page_range(modified_paginator, modified_page_obj),
         'fusion_page_range': get_page_range(fusion_paginator, fusion_page_obj),
+        'filter_params': filter_params,
     }
     return render(request, 'polymes/list.html', context)
     
