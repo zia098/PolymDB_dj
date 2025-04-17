@@ -204,7 +204,8 @@
         </div>
       </div>
     </div>
-    <!-- Wild‑type pagination -->
+    
+<!-- Wild‑type pagination -->
 <nav aria-label="Wild-type pagination" class="mt-3">
   <ul class="pagination justify-content-center">
     {% if wild_types.has_previous %}
@@ -215,8 +216,10 @@
       <li class="page-item disabled"><span class="page-link">Previous</span></li>
     {% endif %}
 
-    {% for num in wild_types.paginator.page_range %}
-      {% if wild_types.number == num %}
+    {% for num in wild_page_range %}
+      {% if num == '...' %}
+        <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+      {% elif wild_types.number == num %}
         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
       {% else %}
         <li class="page-item">
@@ -233,6 +236,9 @@
       <li class="page-item disabled"><span class="page-link">Next</span></li>
     {% endif %}
   </ul>
+  <div class="text-center mt-2">
+    <small class="text-muted">Page {{ wild_types.number }} of {{ wild_types.paginator.num_pages }}</small>
+  </div>
 </nav>
 
     
@@ -322,6 +328,7 @@
         </div>
       </div>
     </div>
+    
 <!-- Modified pagination -->
 <nav aria-label="Modified pagination" class="mt-3">
   <ul class="pagination justify-content-center">
@@ -353,7 +360,11 @@
       <li class="page-item disabled"><span class="page-link">Next</span></li>
     {% endif %}
   </ul>
+  <div class="text-center mt-2">
+    <small class="text-muted">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</small>
+  </div>
 </nav>
+    
     <!-- Fusion Domains Section -->
     <div id="fusion" class="data-section d-none">
       <h2 class="section-header">Fusion Domains</h2>
