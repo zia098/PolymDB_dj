@@ -4,284 +4,512 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ polymerase.name }} - PolymDB</title>
+  <title>Polymerase Database</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
     :root {
       --primary-color: #304353;
       --secondary-color: #2d7fc1;
+      --hover-color: #1d5b8f;
       --badge-bg: #e9ecef;
       --badge-text: #495057;
     }
     body {
+      display: flex;
+      min-height: 100vh;
       background-color: #f8f9fa;
-      padding-top: 2rem;
     }
-    .card {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      margin-bottom: 1.5rem;
-    }
-    .card-header {
+    .sidebar {
+      width: 250px;
+      height: 100vh;
       background-color: var(--primary-color);
       color: white;
+      padding-top: 20px;
+      position: fixed;
+      transition: all 0.3s;
+    }
+    .sidebar-header {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 15px;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      color: white;
+      padding: 12px 15px;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin: 5px 10px;
+      border-radius: 5px;
+    }
+    .sidebar a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background-color: var(--secondary-color);
+      transform: translateX(5px);
+    }
+    .content {
+      flex: 1;
+      padding: 30px;
+      margin-left: 250px;
+    }
+    .search-container {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    .search-container i {
+      position: absolute;
+      left: 15px;
+      top: 12px;
+      color: #6c757d;
+    }
+    #search {
+      padding-left: 40px;
+      border-radius: 20px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .table {
+      margin-bottom: 0;
+    }
+    .table thead th {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+    }
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
     }
     .badge {
-      padding: 0.5rem 1rem;
+      padding: 6px 12px;
       border-radius: 15px;
       font-weight: 500;
     }
-    .property-item {
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
-    }
-    .property-item:last-child {
-      border-bottom: none;
-    }
-    .property-label {
-      font-weight: 600;
+    .section-header {
+      margin-bottom: 20px;
       color: var(--primary-color);
-    }
-    
-    .external-link {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      color: var(--secondary-color);
-      text-decoration: none;
+      gap: 10px;
     }
-    
-    .external-link:hover {
-      text-decoration: underline;
+    /* Responsive table */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 60px;
+      }
+      .sidebar a span {
+        display: none;
+      }
+      .content {
+        margin-left: 60px;
+      }
+      .table-responsive {
+        overflow-x: auto;
+      }
+    }
+    /* Loading spinner */
+    .spinner-border {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--secondary-color);
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Back button and title row -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <a href="{% url 'polymerase_list' %}#modified" class="btn btn-outline-primary">
-        <i class="fas fa-arrow-left"></i> Back 
-      </a>
-      <h1 class="mb-0">{{ polymerase.name }}</h1>
-      <span class="badge bg-primary">Modified Polymerase</span>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h4>PolymDB</h4>
     </div>
-
-    <div class="row">
-      <!-- Basic Information-->
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Basic Information</h5>
-          </div>
-          <div class="card-body">
-            {% if polymerase.base_polymerase %}
-            <div class="property-item">
-              <span class="property-label">Base Polymerase:</span>
-              <div>{{ polymerase.base_polymerase }}</div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.modification_type %}
-            <div class="property-item">
-              <span class="property-label">Modification Type:</span>
-              <div>{{ polymerase.modification_type }}</div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.modifications and polymerase.modifications != "None" %}
-            <div class="property-item">
-              <span class="property-label">Modifications:</span>
-              <div>{{ polymerase.modifications }}</div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.applications and polymerase.applications != "None" %}
-            <div class="property-item">
-              <span class="property-label">Application:</span>
-              <div>{{ polymerase.applications }}</div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.exo_activity_5_3 and polymerase.exo_activity_5_3 != "None" %}
-            <div class="property-item">
-              <span class="property-label">5'-3' Exonuclease Activity:</span>
-              <div>{{ polymerase.exo_activity_5_3 }}</div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.exo_activity_3_5 and polymerase.exo_activity_3_5 != "None" %}
-            <div class="property-item">
-              <span class="property-label">3'-5' Exonuclease Activity:</span>
-              <div>{{ polymerase.exo_activity_3_5 }}</div>
-            </div>
-            {% endif %}
-            
-            {% if not polymerase.base_polymerase and not polymerase.modification_type and not polymerase.modifications and not polymerase.applications and not polymerase.exo_activity_5_3 and not polymerase.exo_activity_3_5 %}
-            <p>No basic information available.</p>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-
-      <!-- Properties -->
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="mb-0">Properties</h5>
-          </div>
-          <div class="card-body">
-            {% if polymerase.optimal_temp or polymerase.melting_temp or polymerase.processivity or polymerase.optimal_ph or polymerase.activity or polymerase.binding_affinity or polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl or polymerase.enhanced_properties %}
-              {% if polymerase.optimal_temp %}
-              <div class="property-item">
-                <span class="property-label">Optimal Temperature:</span>
-                <div>{{ polymerase.optimal_temp }}°C</div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.melting_temp %}
-              <div class="property-item">
-                <span class="property-label">Melting Temperature:</span>
-                <div>{{ polymerase.melting_temp }}°C</div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.processivity %}
-              <div class="property-item">
-                <span class="property-label">Processivity:</span>
-                <div>{{ polymerase.processivity }} bp</div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.optimal_ph %}
-              <div class="property-item">
-                <span class="property-label">Optimal pH:</span>
-                <div>
-                  {{ polymerase.optimal_ph }}
-                  {% if polymerase.ph_stability %}
-                    ({{ polymerase.ph_stability }})
-                  {% endif %}
-                </div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.activity %}
-              <div class="property-item">
-                <span class="property-label">Activity:</span>
-                <div>{{ polymerase.activity|floatformat:0|intcomma }} U/mg</div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.binding_affinity %}
-              <div class="property-item">
-                <span class="property-label">Binding Affinity kd:</span>
-                <div>{{ polymerase.binding_affinity }} nM</div>
-              </div>
-              {% endif %}
-              
-              {% if polymerase.salt_tolerance_nacl or polymerase.salt_tolerance_kcl %}
-              <div class="property-item">
-                <span class="property-label">Salt Tolerance:</span>
-                {% if polymerase.salt_tolerance_nacl %}
-                <div>NaCl: {{ polymerase.salt_tolerance_nacl }} mM</div>
-                {% endif %}
-                {% if polymerase.salt_tolerance_kcl %}
-                <div>KCl: {{ polymerase.salt_tolerance_kcl }} mM</div>
-                {% endif %}
-              </div>
-              {% endif %}
-            {% else %}
-              <p>No detailed properties available.</p>
-            {% endif %}
-
-            {% if polymerase.enhanced_properties and polymerase.enhanced_properties != "None" %}
-            <div class="property-item">
-              <span class="property-label">Enhanced Properties:</span>
-              <div>{{ polymerase.enhanced_properties }}</div>
-            </div>
-            {% endif %}
-          </div>
+    <a href="#" class="menu-item active" data-target="wild-type">
+      <span>Wild-type Polymerases</span>
+    </a>
+    <a href="#" class="menu-item" data-target="modified">
+      <span>Modified Polymerases</span>
+    </a>
+     <!-- Commented out Fusion Domains
+    <a href="#" class="menu-item" data-target="fusion">
+      <span>Fusion Domains</span>
+    </a>
+    -->
+  </nav>
+  
+  <div class="content">
+    <div class="search-container">
+      <i class="fas fa-search"></i>
+      <input type="text" id="search" class="form-control" placeholder="Search in current section...">
+    </div>
+    
+    <!-- Wild-type Polymerases Section -->
+    <div id="wild-type" class="data-section">
+      <h2 class="section-header">Wild-type Polymerases</h2>
+      <div class="table-container">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Family</th>
+                <th>5'-3' Exo Activity</th>
+                <th>References</th>
+              </tr>
+            </thead>
+            <tbody id="wild-table-body">
+              {% for poly in wild_types %}
+              <tr data-url="{% url 'wildtype_detail' poly.id %}">
+                <td><strong>{{ poly.name }}</strong></td>
+                <td>{{ poly.source_strain }}</td>
+                <td>
+                  <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
+                    {{ poly.family }}
+                  </span>
+                </td>
+                <td>{{ poly.exo_activity }}</td>
+                <td>
+                  <a href="{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-
-    <!-- Reference & External IDs Section -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <h5 class="mb-0">References & IDs</h5>
+    
+    <!-- Modified Polymerases Section -->
+    <div id="modified" class="data-section d-none">
+      <h2 class="section-header">Modified Polymerases</h2>
+      <!-- Filter Button -->
+      <div class="mb-3">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+          <i class="fas fa-filter"></i> Open Filters
+        </button>
       </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
-            {% if polymerase.doi %}
-            <div class="property-item">
-              <span class="property-label">Publication:</span>
-              <div>
-                <a href="https://doi.org/{{ polymerase.doi }}" target="_blank" class="external-link">
-                  <i class="fas fa-external-link-alt"></i> {{ polymerase.doi }}
-                </a>
-              </div>
-            </div>
-            {% endif %}
-          </div>
-          
-          <div class="col-md-6">
-            {% if polymerase.genbank and polymerase.genbank != "None" %}
-            <div class="property-item">
-              <span class="property-label">GenBank:</span>
-              <div>
-                <a href="https://www.ncbi.nlm.nih.gov/nuccore/{{ polymerase.genbank }}" target="_blank" class="external-link">
-                  {{ polymerase.genbank }}
-                </a>
-              </div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.uniprot and polymerase.uniprot != "None" %}
-            <div class="property-item">
-              <span class="property-label">UniProt:</span>
-              <div>
-                <a href="https://www.uniprot.org/uniprot/{{ polymerase.uniprot }}" target="_blank" class="external-link">
-                  <i class="fas fa-database"></i> {{ polymerase.uniprot }}
-                </a>
-              </div>
-            </div>
-            {% endif %}
-            
-            {% if polymerase.PDB and polymerase.PDB != "None" %}
-            <div class="property-item">
-              <span class="property-label">PDB:</span>
-              <div>
-                <a href="https://www.rcsb.org/structure/{{ polymerase.PDB }}" target="_blank" class="external-link">
-                  <i class="fas fa-cube"></i> {{ polymerase.PDB }}
-                </a>
-              </div>
-            </div>
-            {% endif %}
-          </div>
+      <!-- Table -->
+      <div class="table-container">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Base Polymerase</th>
+                <th>Modification Type</th>
+                <th>Properties</th>
+                <th>References</th>
+              </tr>
+            </thead>
+            <tbody id="modified-table-body">
+              {% for poly in modifieds %}
+              <tr data-url="{% url 'modified_detail' poly.id %}"
+                  data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
+                  data-melting-temp="{{ poly.melting_temp|default:'' }}"
+                  data-activity="{{ poly.activity|default:'' }}"
+                  data-base-polymerase="{{ poly.base_polymerase|default:'' }}"
+                  data-modification-type="{{ poly.modification_type|default:'' }}">
+                <td><strong>{{ poly.name }}</strong></td>
+                <td>{{ poly.base_polymerase }}</td>
+                <td>
+                  <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
+                    {{ poly.modification_type }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm properties-btn"
+                          data-bs-toggle="tooltip"
+                          data-bs-html="true"
+                          title="
+                          <div class='text-start'>
+                            {% if poly.optimal_temp %}
+                              <strong>Optimal Temperature:</strong> {{ poly.optimal_temp }}°C<br>
+                            {% endif %}
+                            {% if poly.melting_temp %}
+                              <strong>Melting Temperature:</strong> {{ poly.melting_temp }}°C<br>
+                            {% endif %}
+                            {% if poly.processivity %}
+                              <strong>Processivity:</strong> {{ poly.processivity }} bp<br>
+                            {% endif %}
+                            {% if poly.optimal_ph %}
+                              <strong>pH:</strong> {{ poly.optimal_ph }}{% if poly.ph_stability %} ({{ poly.ph_stability }}){% endif %}<br>
+                            {% endif %}
+                            {% if poly.activity %}
+                              <strong>Activity:</strong> {{ poly.activity|floatformat:0|intcomma }} U/mg<br>
+                            {% endif %}
+                            {% if poly.Binding_Affinity_kd %}
+                              <strong>Binding Affinity kd:</strong> {{ poly.Binding_Affinity_kd }} nM<br>
+                            {% endif %}
+                            {% if poly.salt_tolerance_nacl or poly.salt_tolerance_kcl %}
+                              <strong>Salt Tolerance:</strong><br>
+                              {% if poly.salt_tolerance_nacl %}
+                                - NaCl: {{ poly.salt_tolerance_nacl }} mM<br>
+                              {% endif %}
+                              {% if poly.salt_tolerance_kcl %}
+                                - KCl: {{ poly.salt_tolerance_kcl }} mM
+                              {% endif %}
+                            {% endif %}
+                          </div>">
+                    <i class="fas fa-info-circle"></i> Properties
+                  </button>
+                </td>
+                <td>
+                  <a href="https://doi.org/{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        
-        {% if not polymerase.doi and not polymerase.genbank and not polymerase.uniprot and not polymerase.PDB %}
-        <p>No reference information available.</p>
-        {% endif %}
       </div>
     </div>
-
-        {% if polymerase.sequence %}
-        <!-- Sequence Section -->
-        <div class="card mb-4">
-          <div class="card-header">
-            <h5 class="mb-0">Sequence</h5>
-          </div>
-          <div class="card-body">
-            <pre>{{ polymerase.sequence }}</pre>
-          </div>
+    
+    <!-- Fusion Domains Section -->
+    <div id="fusion" class="data-section d-none">
+      <h2 class="section-header">Fusion Domains</h2>
+      <div class="table-container">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Source</th>
+                <th>Strain</th>
+                <th>Length</th>
+                <th>Links</th>
+              </tr>
+            </thead>
+            <tbody id="fusion-table-body">
+              {% for domain in fusions %}
+              <tr data-url="{% url 'domain_detail' domain.id %}">
+                <td><strong>{{ domain.name }}</strong></td>
+                <td>
+                  <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
+                    {{ domain.functional_type }}
+                  </span>
+                </td>
+                <td>{{ domain.source_protein }}</td>
+                <td>{{ domain.strain }}</td>
+                <td>{{ domain.length }}</td>
+                <td>
+                  <a href="{{ domain.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-external-link-alt"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        {% endif %}
       </div>
     </div>
   </div>
 
+  <!-- Filter Modal -->
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filterModalLabel">Filter Modified Polymerases</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Optimal Temperature Range (grouped inputs) -->
+          <div class="mb-3">
+            <label class="form-label">Optimal Temperature Range (°C)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="filter-optimal-temp-min" placeholder="Min">
+              <span class="input-group-text">-</span>
+              <input type="number" class="form-control" id="filter-optimal-temp-max" placeholder="Max">
+            </div>
+          </div>
+          <!-- Melting Temperature -->
+          <div class="mb-3">
+            <label class="form-label">Melting Temperature Range (°C)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="filter-melting-temp-min" placeholder="Min">
+              <span class="input-group-text">-</span>
+    
+            </div>
+          </div>
+           <!-- Activity -->
+          <div class="mb-3">
+            <label for="filter-activity-min" class="form-label">Activity (min U/mg)</label>
+            <input type="number" class="form-control" id="filter-activity-min" placeholder="e.g., 10">
+          </div>
+          <!-- Base Polymerase -->
+          <div class="mb-3">
+            <label for="filter-base-polymerase" class="form-label">Base Polymerase</label>
+            <input type="text" class="form-control" id="filter-base-polymerase" placeholder="Type to filter">
+          </div>
+          <!-- Modification Type -->
+          <div class="mb-3">
+            <label for="filter-modification-type" class="form-label">Modification Type</label>
+            <input type="text" class="form-control" id="filter-modification-type" placeholder="Type to filter">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="clear-filter" type="button" class="btn btn-secondary">Clear Filters</button>
+          <button id="apply-filter" type="button" class="btn btn-primary">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Check for hash in URL and activate the corresponding tab
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1); // Remove the # character
+        $('.menu-item').removeClass('active');
+        $('.menu-item[data-target="' + targetId + '"]').addClass('active');
+        $('.data-section').addClass('d-none');
+        $('#' + targetId).removeClass('d-none');
+      }
+      
+      // Initialize Bootstrap tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function(el) {
+        return new bootstrap.Tooltip(el);
+      });
+
+      // Menu item handling: toggle sections using Bootstrap's d-none
+      $('.menu-item').click(function(e) {
+        e.preventDefault();
+        $('.menu-item').removeClass('active');
+        $(this).addClass('active');
+        $('.data-section').addClass('d-none');
+        $('#' + $(this).data('target')).removeClass('d-none');
+        $('#search').val(''); // Reset text search when switching sections
+      });
+      
+      // Simple text search within the visible section
+      $('#search').on('input', function() {
+        let searchTerm = $(this).val().toLowerCase();
+        $('.data-section:not(.d-none) tbody tr').each(function() {
+          let rowText = $(this).text().toLowerCase();
+          $(this).toggle(rowText.includes(searchTerm));
+        });
+      });
+
+      // Function to apply numeric and text filters in the Modified Polymerases table
+      function applyFilters() {
+        var optimalTempMin = parseFloat($('#filter-optimal-temp-min').val());
+        var optimalTempMax = parseFloat($('#filter-optimal-temp-max').val());
+        var meltingTempMin = parseFloat($('#filter-melting-temp-min').val()); // New
+        var activityMin = parseFloat($('#filter-activity-min').val());
+        var basePolymeraseFilter = $('#filter-base-polymerase').val().toLowerCase();
+        var modificationTypeFilter = $('#filter-modification-type').val().toLowerCase();
+        
+        $('#modified-table-body tr').each(function() {
+          var $row = $(this);
+          var rowOptimalTemp = parseFloat($row.data('optimal-temp'));
+          var rowActivity = parseFloat($row.data('activity'));
+          var rowMeltingTemp = parseFloat($row.data('melting-temp')); // New
+          var rowBasePolymerase = ($row.data('base-polymerase') || "").toString().toLowerCase();
+          var rowModificationType = ($row.data('modification-type') || "").toString().toLowerCase();
+          var showRow = true;
+          
+          // Filter by optimal temperature range
+          if (!isNaN(optimalTempMin) && (isNaN(rowOptimalTemp) || rowOptimalTemp < optimalTempMin)) {
+            showRow = false;
+          }
+          if (!isNaN(optimalTempMax) && (isNaN(rowOptimalTemp) || rowOptimalTemp > optimalTempMax)) {
+            showRow = false;
+          }
+          
+          // Filter by melting temperature range (new)
+          if (!isNaN(meltingTempMin) && (isNaN(rowMeltingTemp) || rowMeltingTemp < meltingTempMin)) {
+            showRow = false;
+          }
+          
+          // Filter by minimum activity
+          if (!isNaN(activityMin) && (isNaN(rowActivity) || rowActivity < activityMin)) {
+            showRow = false;
+          }
+          
+          // Filter by Base Polymerase substring (if provided)
+          if (basePolymeraseFilter && !rowBasePolymerase.includes(basePolymeraseFilter)) {
+            showRow = false;
+          }
+          
+          // Filter by Modification Type substring (if provided)
+          if (modificationTypeFilter && !rowModificationType.includes(modificationTypeFilter)) {
+            showRow = false;
+          }
+          
+          $row.toggle(showRow);
+        });
+      }
+            
+      // Apply filters and hide modal on click
+      $('#apply-filter').click(function() {
+        applyFilters();
+        // Hide the modal after applying filters
+        var modalEl = document.getElementById('filterModal');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+      });
+
+      // Clear filters, reset inputs, and show all rows; also hide modal
+      $('#clear-filter').click(function() {
+        $('#filterModal input').val('');
+        $('#modified-table-body tr').show();
+        var modalEl = document.getElementById('filterModal');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+      });
+
+      // Make table rows clickable to navigate to their dedicated detail pages.
+      $('tbody tr[data-url]').css('cursor', 'pointer').on('click', function(e) {
+        // Avoid triggering if clicking on links or buttons within the row.
+        if ($(e.target).closest('a, button').length) return;
+        window.location = $(this).data('url');
+      });
+
+      // Show loading spinner during AJAX events (if applicable)
+      $(document).ajaxStart(function() {
+        $('.spinner-border').show();
+      }).ajaxStop(function() {
+        $('.spinner-border').hide();
+      });
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
