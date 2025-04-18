@@ -77,6 +77,23 @@ def polymerase_list(request):
         'base_poly': base_poly or '',
         'mod_type': mod_type or '',
     }
+    
+    # Create query string for detail page links
+    query_params = ''
+    if modified_page:
+        query_params += f'mod_page={modified_page}'
+    if opt_temp_min:
+        query_params += f'&opt_temp_min={opt_temp_min}'
+    if opt_temp_max:
+        query_params += f'&opt_temp_max={opt_temp_max}'
+    if melt_temp_min:
+        query_params += f'&melt_temp_min={melt_temp_min}'
+    if activity_min:
+        query_params += f'&activity_min={activity_min}'
+    if base_poly:
+        query_params += f'&base_poly={base_poly}'
+    if mod_type:
+        query_params += f'&mod_type={mod_type}'
 
     context = {
         'wild_types': wild_page_obj,
@@ -86,43 +103,45 @@ def polymerase_list(request):
         'modified_page_range': get_page_range(modified_paginator, modified_page_obj),
         'fusion_page_range': get_page_range(fusion_paginator, fusion_page_obj),
         'filter_params': filter_params,
+        'query_params': query_params,
     }
     return render(request, 'polymes/list.html', context)
     
 def wildtype_detail(request, pk):
     polymerase = get_object_or_404(WildTypePolymerase, pk=pk)
-    return render(request, 'polymes/wildtype_detail.html', {'polymerase': polymerase})
+    
+    # Get referrer params
+    ref_params = {}
+    for key, value in request.GET.items():
+        ref_params[key] = value
+    
+    return render(request, 'polymes/wildtype_detail.html', {
+        'polymerase': polymerase,
+        'ref_params': ref_params
+    })
 
 def modified_detail(request, pk):
     polymerase = get_object_or_404(ModifiedPolymerase, pk=pk)
-    return render(request, 'polymes/modified_detail.html', {'polymerase': polymerase})
+    
+    # Extract referrer parameters
+    ref_params = {}
+    for key, value in request.GET.items():
+        ref_params[key] = value
+    
+    return render(request, 'polymes/modified_detail.html', {
+        'polymerase': polymerase,
+        'ref_params': ref_params
+    })
 
 def domain_detail(request, pk):
     domain = get_object_or_404(FusionDomain, pk=pk)
-    return render(request, 'polymes/domain_detail.html', {'domain': domain})
-
-# Add this to your views.py file
-def get_page_range(paginator, page, window=2):
-    """Return a limited page range around the current page."""
-    current_page = page.number
-    total_pages = paginator.num_pages
     
-    # Start with a window around current page
-    start = max(current_page - window, 1)
-    end = min(current_page + window, total_pages)
+    # Get referrer params
+    ref_params = {}
+    for key, value in request.GET.items():
+        ref_params[key] = value
     
-    # Add first and last pages if they're not already included
-    page_range = []
-    if start > 1:
-        page_range.extend([1])
-        if start > 2:
-            page_range.extend(['...'])
-    
-    page_range.extend(range(start, end + 1))
-    
-    if end < total_pages:
-        if end < total_pages - 1:
-            page_range.extend(['...'])
-        page_range.extend([total_pages])
-    
-    return page_range
+    return render(request, 'polymes/domain_detail.html', {
+        'domain': domain,
+        'ref_params': ref_params
+    })
