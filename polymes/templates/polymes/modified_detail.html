@@ -61,7 +61,7 @@
   <div class="container">
     <!-- Back button and title row -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <a href="{% url 'polymerase_list' %}#modified" class="btn btn-outline-primary">
+      <a href="{% url 'polymerase_list' %}{% if ref_params %}?{% for key, value in ref_params.items %}{{ key }}={{ value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}#modified" class="btn btn-outline-primary">
         <i class="fas fa-arrow-left"></i> Back 
       </a>
       <h1 class="mb-0">{{ polymerase.name }}</h1>
