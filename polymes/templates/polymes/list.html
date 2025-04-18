@@ -280,7 +280,7 @@
             </thead>
             <tbody id="modified-table-body">
               {% for poly in modifieds %}
-              <tr data-url="{% url 'modified_detail' poly.id %}"
+              <tr data-url="{% url 'modified_detail' poly.id %}?mod_page={{ modifieds.number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}"
                   data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
                   data-melting-temp="{{ poly.melting_temp|default:'' }}"
                   data-activity="{{ poly.activity|default:'' }}"
