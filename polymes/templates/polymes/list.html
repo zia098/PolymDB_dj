@@ -126,6 +126,14 @@
       margin-bottom: 15px;
       border-left: 4px solid var(--secondary-color);
     }
+    .jump-to-page-form {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .page-jump-input {
+      width: 70px;
+      text-align: center;
+    }
     /* Responsive table */
     @media (max-width: 768px) {
       .sidebar {
@@ -399,8 +407,39 @@
           <li class="page-item disabled"><span class="page-link">Next</span></li>
         {% endif %}
       </ul>
-      <div class="text-center mt-2">
-        <small class="text-muted">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</small>
+      
+      <!-- Jump to page feature -->
+      <div class="d-flex justify-content-center align-items-center mt-2 mb-2">
+        <form id="jump-to-page-form" method="get" action="" class="d-flex align-items-center jump-to-page-form">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</span>
+            <input type="number" name="mod_page" class="form-control page-jump-input" min="1" max="{{ modifieds.paginator.num_pages }}" placeholder="Go to page" value="">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Go</button>
+          </div>
+          
+          <!-- Preserve other parameters -->
+          {% if search_term %}
+          <input type="hidden" name="search" value="{{ search_term }}">
+          {% endif %}
+          {% if filter_params.opt_temp_min %}
+          <input type="hidden" name="opt_temp_min" value="{{ filter_params.opt_temp_min }}">
+          {% endif %}
+          {% if filter_params.opt_temp_max %}
+          <input type="hidden" name="opt_temp_max" value="{{ filter_params.opt_temp_max }}">
+          {% endif %}
+          {% if filter_params.melt_temp_min %}
+          <input type="hidden" name="melt_temp_min" value="{{ filter_params.melt_temp_min }}">
+          {% endif %}
+          {% if filter_params.activity_min %}
+          <input type="hidden" name="activity_min" value="{{ filter_params.activity_min }}">
+          {% endif %}
+          {% if filter_params.base_poly %}
+          <input type="hidden" name="base_poly" value="{{ filter_params.base_poly }}">
+          {% endif %}
+          {% if filter_params.mod_type %}
+          <input type="hidden" name="mod_type" value="{{ filter_params.mod_type }}">
+          {% endif %}
+        </form>
       </div>
     </nav>
     {% endif %}
@@ -529,6 +568,27 @@
         if (e.key === "Escape" && $('#search').val().length > 0) {
           $('#search').val('');
           $('#search-form').submit();
+        }
+      });
+      
+      // Jump to page Enter key handling
+      $('#jump-to-page-form .page-jump-input').on('keydown', function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          $('#jump-to-page-form').submit();
+        }
+      });
+      
+      // Validate page input to ensure it's within range
+      $('#jump-to-page-form').on('submit', function(e) {
+        const input = $(this).find('input[name="mod_page"]');
+        const value = parseInt(input.val());
+        const max = parseInt(input.attr('max'));
+        
+        if (isNaN(value) || value < 1) {
+          input.val(1);
+        } else if (value > max) {
+          input.val(max);
         }
       });
     });
