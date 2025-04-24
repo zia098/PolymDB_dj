@@ -90,10 +90,6 @@
     .clear-search:hover {
       color: #343a40;
     }
-    .search-form {
-      width: 100%;
-      display: flex;
-    }
     .table-container {
       background: white;
       padding: 20px;
@@ -196,7 +192,7 @@
       <div class="search-container w-100">
         <i class="fas fa-search"></i>
         <input type="text" id="search" name="search" class="form-control" 
-               placeholder="Search" 
+               placeholder="Search by name, base polymerase, or modification type..." 
                autocomplete="off" 
                spellcheck="false"
                value="{{ search_term }}">
@@ -237,7 +233,7 @@
       <h2 class="section-header">Modified Polymerases</h2>
       
       <!-- Active filters and search indicator -->
-      {% if search_term or filter_params %}
+      {% if search_term or filter_params.opt_temp_min or filter_params.opt_temp_max or filter_params.melt_temp_min or filter_params.activity_min or filter_params.base_poly or filter_params.mod_type %}
       <div class="search-indicator">
         <div class="d-flex justify-content-between align-items-center">
           <div>
@@ -245,7 +241,7 @@
             <span class="me-2"><strong>Search:</strong> "{{ search_term }}"</span>
             {% endif %}
             
-            {% if filter_params %}
+            {% if filter_params.opt_temp_min or filter_params.opt_temp_max or filter_params.melt_temp_min or filter_params.activity_min or filter_params.base_poly or filter_params.mod_type %}
             <span>
               {% if filter_params.opt_temp_min or filter_params.opt_temp_max %}
               <span class="badge bg-light text-dark me-1">Temp: 
