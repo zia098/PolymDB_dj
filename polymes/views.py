@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
+from django.db.models import Q
 from .models import WildTypePolymerase, ModifiedPolymerase, FusionDomain
 
 def get_page_range(paginator, page, window=2):
@@ -30,6 +31,17 @@ def polymerase_list(request):
     wild_qs = WildTypePolymerase.objects.all().order_by('name')
     modified_qs = ModifiedPolymerase.objects.all().order_by('name')
     fusion_qs = FusionDomain.objects.all().order_by('name')
+    
+    # Get search term
+    search_term = request.GET.get('search', '')
+    
+    # Apply search to modified polymerases if search term exists
+    if search_term:
+        modified_qs = modified_qs.filter(
+            Q(name__icontains=search_term) | 
+            Q(base_polymerase__icontains=search_term) | 
+            Q(modification_type__icontains=search_term)
+        )
     
     # Apply filters to modified polymerases
     opt_temp_min = request.GET.get('opt_temp_min')
@@ -82,6 +94,8 @@ def polymerase_list(request):
     query_params = ''
     if modified_page:
         query_params += f'mod_page={modified_page}'
+    if search_term:
+        query_params += f'&search={search_term}'
     if opt_temp_min:
         query_params += f'&opt_temp_min={opt_temp_min}'
     if opt_temp_max:
@@ -104,6 +118,7 @@ def polymerase_list(request):
         'fusion_page_range': get_page_range(fusion_paginator, fusion_page_obj),
         'filter_params': filter_params,
         'query_params': query_params,
+        'search_term': search_term,  # Add search term to context
     }
     return render(request, 'polymes/list.html', context)
     
