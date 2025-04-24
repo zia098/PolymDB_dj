@@ -72,9 +72,23 @@
     }
     #search {
       padding-left: 40px;
+      padding-right: 40px;
       border-radius: 20px;
       border: 1px solid #dee2e6;
       box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+    .clear-search {
+      position: absolute;
+      right: 10px;
+      top: 5px;
+      color: #6c757d;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: none;
+    }
+    .clear-search:hover {
+      color: #343a40;
     }
     .table-container {
       background: white;
@@ -104,6 +118,15 @@
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+    #no-results-message {
+      padding: 20px;
+      color: #6c757d;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
     }
     /* Responsive table */
     @media (max-width: 768px) {
@@ -169,7 +192,13 @@
   <div class="content">
     <div class="search-container">
       <i class="fas fa-search"></i>
-      <input type="text" id="search" class="form-control" placeholder="Search in current section...">
+      <input type="text" id="search" class="form-control" 
+             placeholder="Search by name, base polymerase, or modification type..." 
+             autocomplete="off" 
+             spellcheck="false">
+      <button class="clear-search" type="button" title="Clear search">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
     
     <!-- Modified Polymerases Section -->
@@ -258,43 +287,48 @@
         </div>
       </div>
     
+    <!-- No results message -->
+    <div id="no-results-message" class="mt-3">
+      <p><i class="fas fa-search me-2"></i> No polymerases found matching your search criteria.</p>
+      <button class="btn btn-outline-secondary btn-sm clear-search-results">Clear search</button>
+    </div>
     
-<!-- Modified pagination -->
-<nav aria-label="Modified pagination" class="mt-3">
-  <ul class="pagination justify-content-center">
-    {% if modifieds.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Previous</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Previous</span></li>
-    {% endif %}
+    <!-- Modified pagination -->
+    <nav aria-label="Modified pagination" class="mt-3">
+      <ul class="pagination justify-content-center">
+        {% if modifieds.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Previous</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
 
-    {% for num in modified_page_range %}
-      {% if num == '...' %}
-        <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
-      {% elif modifieds.number == num %}
-        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-      {% else %}
-        <li class="page-item">
-          <a class="page-link" href="?mod_page={{ num }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">{{ num }}</a>
-        </li>
-      {% endif %}
-    {% endfor %}
+        {% for num in modified_page_range %}
+          {% if num == '...' %}
+            <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+          {% elif modifieds.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?mod_page={{ num }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">{{ num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
 
-    {% if modifieds.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Next</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled"><span class="page-link">Next</span></li>
-    {% endif %}
-  </ul>
-  <div class="text-center mt-2">
-    <small class="text-muted">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</small>
-  </div>
-</nav>
-</div>
+        {% if modifieds.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Next</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+      </ul>
+      <div class="text-center mt-2">
+        <small class="text-muted">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</small>
+      </div>
+    </nav>
+    </div>
   </div>
 
   <!-- Filter Modal -->
@@ -361,13 +395,56 @@
         return new bootstrap.Tooltip(el);
       });
       
-      // Simple text search within the visible section
+      // Enhanced search functionality
       $('#search').on('input', function() {
-        let searchTerm = $(this).val().toLowerCase();
-        $('.data-section:not(.d-none) tbody tr').each(function() {
-          let rowText = $(this).text().toLowerCase();
-          $(this).toggle(rowText.includes(searchTerm));
+        let searchTerm = $(this).val().toLowerCase().trim();
+        
+        // Show/hide clear button based on whether there's text
+        if (searchTerm.length > 0) {
+          $('.clear-search').show();
+        } else {
+          $('.clear-search').hide();
+        }
+        
+        // Keep track of visible rows
+        let visibleRows = 0;
+        
+        // Search across multiple fields in each row
+        $('#modified-table-body tr').each(function() {
+          let name = $(this).find('td:nth-child(1)').text().toLowerCase();
+          let basePolymerase = $(this).find('td:nth-child(2)').text().toLowerCase();
+          let modType = $(this).find('td:nth-child(3)').text().toLowerCase();
+          
+          // Check if any field contains the search term
+          let matchesSearch = name.includes(searchTerm) || 
+                             basePolymerase.includes(searchTerm) || 
+                             modType.includes(searchTerm);
+                             
+          $(this).toggle(matchesSearch);
+          
+          if (matchesSearch) {
+            visibleRows++;
+          }
         });
+        
+        // Show/hide the pagination based on search results
+        if (searchTerm.length > 0) {
+          $('nav[aria-label="Modified pagination"]').toggle(visibleRows > 0);
+        } else {
+          $('nav[aria-label="Modified pagination"]').show();
+        }
+        
+        // Show/hide no results message
+        if (searchTerm.length > 0 && visibleRows === 0) {
+          $('#no-results-message').show();
+        } else {
+          $('#no-results-message').hide();
+        }
+      });
+
+      // Clear search
+      $('.clear-search, .clear-search-results').on('click', function() {
+        $('#search').val('').trigger('input').focus();
       });
 
       // Apply filters and submit the form
@@ -447,6 +524,13 @@
         $('.spinner-border').show();
       }).ajaxStop(function() {
         $('.spinner-border').hide();
+      });
+      
+      // Press ESC to clear search
+      $(document).keyup(function(e) {
+        if (e.key === "Escape" && $('#search').val().length > 0) {
+          $('#search').val('').trigger('input').focus();
+        }
       });
     });
   </script>
