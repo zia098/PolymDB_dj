@@ -90,6 +90,10 @@
     .clear-search:hover {
       color: #343a40;
     }
+    .search-form {
+      width: 100%;
+      display: flex;
+    }
     .table-container {
       background: white;
       padding: 20px;
@@ -119,14 +123,12 @@
       align-items: center;
       gap: 10px;
     }
-    #no-results-message {
-      padding: 20px;
-      color: #6c757d;
-      background-color: #f8f9fa;
-      border-radius: 10px;
-      text-align: center;
-      margin-top: 20px;
-      display: none;
+    .search-indicator {
+      background: #f8f9fa;
+      border-radius: 5px;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--secondary-color);
     }
     /* Responsive table */
     @media (max-width: 768px) {
@@ -190,26 +192,99 @@
   </nav>
   
   <div class="content">
-    <div class="search-container">
-      <i class="fas fa-search"></i>
-      <input type="text" id="search" class="form-control" 
-             placeholder="Search by name, base polymerase, or modification type..." 
-             autocomplete="off" 
-             spellcheck="false">
-      <button class="clear-search" type="button" title="Clear search">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
+    <form method="get" action="" class="search-form" id="search-form">
+      <div class="search-container w-100">
+        <i class="fas fa-search"></i>
+        <input type="text" id="search" name="search" class="form-control" 
+               placeholder="Search" 
+               autocomplete="off" 
+               spellcheck="false"
+               value="{{ search_term }}">
+        {% if search_term %}
+        <button type="button" class="clear-search" style="display: block;" title="Clear search">
+          <i class="fas fa-times"></i>
+        </button>
+        {% else %}
+        <button type="button" class="clear-search" title="Clear search">
+          <i class="fas fa-times"></i>
+        </button>
+        {% endif %}
+        <input type="hidden" name="mod_page" value="1">
+        <!-- Preserve other filter parameters -->
+        {% if filter_params.opt_temp_min %}
+        <input type="hidden" name="opt_temp_min" value="{{ filter_params.opt_temp_min }}">
+        {% endif %}
+        {% if filter_params.opt_temp_max %}
+        <input type="hidden" name="opt_temp_max" value="{{ filter_params.opt_temp_max }}">
+        {% endif %}
+        {% if filter_params.melt_temp_min %}
+        <input type="hidden" name="melt_temp_min" value="{{ filter_params.melt_temp_min }}">
+        {% endif %}
+        {% if filter_params.activity_min %}
+        <input type="hidden" name="activity_min" value="{{ filter_params.activity_min }}">
+        {% endif %}
+        {% if filter_params.base_poly %}
+        <input type="hidden" name="base_poly" value="{{ filter_params.base_poly }}">
+        {% endif %}
+        {% if filter_params.mod_type %}
+        <input type="hidden" name="mod_type" value="{{ filter_params.mod_type }}">
+        {% endif %}
+      </div>
+    </form>
     
     <!-- Modified Polymerases Section -->
     <div id="modified" class="data-section">
       <h2 class="section-header">Modified Polymerases</h2>
+      
+      <!-- Active filters and search indicator -->
+      {% if search_term or filter_params %}
+      <div class="search-indicator">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            {% if search_term %}
+            <span class="me-2"><strong>Search:</strong> "{{ search_term }}"</span>
+            {% endif %}
+            
+            {% if filter_params %}
+            <span>
+              {% if filter_params.opt_temp_min or filter_params.opt_temp_max %}
+              <span class="badge bg-light text-dark me-1">Temp: 
+                {% if filter_params.opt_temp_min %}{{ filter_params.opt_temp_min }}°C{% endif %}
+                {% if filter_params.opt_temp_min and filter_params.opt_temp_max %}-{% endif %}
+                {% if filter_params.opt_temp_max %}{{ filter_params.opt_temp_max }}°C{% endif %}
+              </span>
+              {% endif %}
+              
+              {% if filter_params.melt_temp_min %}
+              <span class="badge bg-light text-dark me-1">Melt temp: ≥{{ filter_params.melt_temp_min }}°C</span>
+              {% endif %}
+              
+              {% if filter_params.activity_min %}
+              <span class="badge bg-light text-dark me-1">Activity: ≥{{ filter_params.activity_min }} U/mg</span>
+              {% endif %}
+              
+              {% if filter_params.base_poly %}
+              <span class="badge bg-light text-dark me-1">Base: {{ filter_params.base_poly }}</span>
+              {% endif %}
+              
+              {% if filter_params.mod_type %}
+              <span class="badge bg-light text-dark me-1">Type: {{ filter_params.mod_type }}</span>
+              {% endif %}
+            </span>
+            {% endif %}
+          </div>
+          <a href="?" class="btn btn-sm btn-outline-secondary">Clear All</a>
+        </div>
+      </div>
+      {% endif %}
+      
       <!-- Filter Button -->
       <div class="mb-3">
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
           <i class="fas fa-filter"></i> Open Filters
         </button>
       </div>
+      
       <!-- Table -->
       <div class="table-container">
         <div class="table-responsive">
@@ -224,81 +299,85 @@
               </tr>
             </thead>
             <tbody id="modified-table-body">
-              {% for poly in modifieds %}
-              <tr data-url="{% url 'modified_detail' poly.id %}?mod_page={{ modifieds.number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}"
-                  data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
-                  data-melting-temp="{{ poly.melting_temp|default:'' }}"
-                  data-activity="{{ poly.activity|default:'' }}"
-                  data-base-polymerase="{{ poly.base_polymerase|default:'' }}"
-                  data-modification-type="{{ poly.modification_type|default:'' }}">
-                <td><strong>{{ poly.name }}</strong></td>
-                <td>{{ poly.base_polymerase }}</td>
-                <td>
-                  <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
-                    {{ poly.modification_type }}
-                  </span>
-                </td>
-                <td>
-                  <button class="btn btn-sm properties-btn"
-                          data-bs-toggle="tooltip"
-                          data-bs-html="true"
-                          title="
-                          <div class='text-start'>
-                            {% if poly.optimal_temp %}
-                              <strong>Optimal Temperature:</strong> {{ poly.optimal_temp }}°C<br>
-                            {% endif %}
-                            {% if poly.melting_temp %}
-                              <strong>Melting Temperature:</strong> {{ poly.melting_temp }}°C<br>
-                            {% endif %}
-                            {% if poly.processivity %}
-                              <strong>Processivity:</strong> {{ poly.processivity }} bp<br>
-                            {% endif %}
-                            {% if poly.optimal_ph %}
-                              <strong>pH:</strong> {{ poly.optimal_ph }}{% if poly.ph_stability %} ({{ poly.ph_stability }}){% endif %}<br>
-                            {% endif %}
-                            {% if poly.activity %}
-                              <strong>Activity:</strong> {{ poly.activity|floatformat:0|intcomma }} U/mg<br>
-                            {% endif %}
-                            {% if poly.Binding_Affinity_kd %}
-                              <strong>Binding Affinity kd:</strong> {{ poly.Binding_Affinity_kd }} nM<br>
-                            {% endif %}
-                            {% if poly.salt_tolerance_nacl or poly.salt_tolerance_kcl %}
-                              <strong>Salt Tolerance:</strong><br>
-                              {% if poly.salt_tolerance_nacl %}
-                                - NaCl: {{ poly.salt_tolerance_nacl }} mM<br>
+              {% if modifieds %}
+                {% for poly in modifieds %}
+                <tr data-url="{% url 'modified_detail' poly.id %}?mod_page={{ modifieds.number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}"
+                    data-optimal-temp="{{ poly.optimal_temp|default:'' }}"
+                    data-melting-temp="{{ poly.melting_temp|default:'' }}"
+                    data-activity="{{ poly.activity|default:'' }}"
+                    data-base-polymerase="{{ poly.base_polymerase|default:'' }}"
+                    data-modification-type="{{ poly.modification_type|default:'' }}">
+                  <td><strong>{{ poly.name }}</strong></td>
+                  <td>{{ poly.base_polymerase }}</td>
+                  <td>
+                    <span class="badge" style="background-color: var(--badge-bg); color: var(--badge-text)">
+                      {{ poly.modification_type }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm properties-btn"
+                            data-bs-toggle="tooltip"
+                            data-bs-html="true"
+                            title="
+                            <div class='text-start'>
+                              {% if poly.optimal_temp %}
+                                <strong>Optimal Temperature:</strong> {{ poly.optimal_temp }}°C<br>
                               {% endif %}
-                              {% if poly.salt_tolerance_kcl %}
-                                - KCl: {{ poly.salt_tolerance_kcl }} mM
+                              {% if poly.melting_temp %}
+                                <strong>Melting Temperature:</strong> {{ poly.melting_temp }}°C<br>
                               {% endif %}
-                            {% endif %}
-                          </div>">
-                    <i class="fas fa-info-circle"></i> Properties
-                  </button>
-                </td>
-                <td>
-                  <a href="https://doi.org/{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-external-link-alt"></i> View
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
+                              {% if poly.processivity %}
+                                <strong>Processivity:</strong> {{ poly.processivity }} bp<br>
+                              {% endif %}
+                              {% if poly.optimal_ph %}
+                                <strong>pH:</strong> {{ poly.optimal_ph }}{% if poly.ph_stability %} ({{ poly.ph_stability }}){% endif %}<br>
+                              {% endif %}
+                              {% if poly.activity %}
+                                <strong>Activity:</strong> {{ poly.activity|floatformat:0|intcomma }} U/mg<br>
+                              {% endif %}
+                              {% if poly.Binding_Affinity_kd %}
+                                <strong>Binding Affinity kd:</strong> {{ poly.Binding_Affinity_kd }} nM<br>
+                              {% endif %}
+                              {% if poly.salt_tolerance_nacl or poly.salt_tolerance_kcl %}
+                                <strong>Salt Tolerance:</strong><br>
+                                {% if poly.salt_tolerance_nacl %}
+                                  - NaCl: {{ poly.salt_tolerance_nacl }} mM<br>
+                                {% endif %}
+                                {% if poly.salt_tolerance_kcl %}
+                                  - KCl: {{ poly.salt_tolerance_kcl }} mM
+                                {% endif %}
+                              {% endif %}
+                            </div>">
+                      <i class="fas fa-info-circle"></i> Properties
+                    </button>
+                  </td>
+                  <td>
+                    <a href="https://doi.org/{{ poly.doi }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                      <i class="fas fa-external-link-alt"></i> View
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center py-4">
+                    <p><i class="fas fa-search me-2"></i> No polymerases found matching your criteria.</p>
+                    <a href="?" class="btn btn-outline-secondary btn-sm">Clear all filters and search</a>
+                  </td>
+                </tr>
+              {% endif %}
             </tbody>
           </table>
         </div>
       </div>
     
-    <!-- No results message -->
-    <div id="no-results-message" class="mt-3">
-      <p><i class="fas fa-search me-2"></i> No polymerases found matching your search criteria.</p>
-      <button class="btn btn-outline-secondary btn-sm clear-search-results">Clear search</button>
-    </div>
-    
     <!-- Modified pagination -->
+    {% if modifieds %}
     <nav aria-label="Modified pagination" class="mt-3">
       <ul class="pagination justify-content-center">
         {% if modifieds.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Previous</a>
+            <a class="page-link" href="?mod_page={{ modifieds.previous_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Previous</a>
           </li>
         {% else %}
           <li class="page-item disabled"><span class="page-link">Previous</span></li>
@@ -311,14 +390,14 @@
             <li class="page-item active"><span class="page-link">{{ num }}</span></li>
           {% else %}
             <li class="page-item">
-              <a class="page-link" href="?mod_page={{ num }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">{{ num }}</a>
+              <a class="page-link" href="?mod_page={{ num }}{% if search_term %}&search={{ search_term }}{% endif %}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">{{ num }}</a>
             </li>
           {% endif %}
         {% endfor %}
 
         {% if modifieds.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Next</a>
+            <a class="page-link" href="?mod_page={{ modifieds.next_page_number }}{% if search_term %}&search={{ search_term }}{% endif %}{% if filter_params.opt_temp_min %}&opt_temp_min={{ filter_params.opt_temp_min }}{% endif %}{% if filter_params.opt_temp_max %}&opt_temp_max={{ filter_params.opt_temp_max }}{% endif %}{% if filter_params.melt_temp_min %}&melt_temp_min={{ filter_params.melt_temp_min }}{% endif %}{% if filter_params.activity_min %}&activity_min={{ filter_params.activity_min }}{% endif %}{% if filter_params.base_poly %}&base_poly={{ filter_params.base_poly }}{% endif %}{% if filter_params.mod_type %}&mod_type={{ filter_params.mod_type }}{% endif %}">Next</a>
           </li>
         {% else %}
           <li class="page-item disabled"><span class="page-link">Next</span></li>
@@ -328,6 +407,7 @@
         <small class="text-muted">Page {{ modifieds.number }} of {{ modifieds.paginator.num_pages }}</small>
       </div>
     </nav>
+    {% endif %}
     </div>
   </div>
 
@@ -339,44 +419,54 @@
           <h5 class="modal-title" id="filterModalLabel">Filter Modified Polymerases</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <!-- Optimal Temperature Range (grouped inputs) -->
-          <div class="mb-3">
-            <label class="form-label">Optimal Temperature Range (°C)</label>
-            <div class="input-group">
-              <input type="number" class="form-control" id="filter-optimal-temp-min" placeholder="Min" value="{{ filter_params.opt_temp_min }}">
-              <span class="input-group-text">-</span>
-              <input type="number" class="form-control" id="filter-optimal-temp-max" placeholder="Max" value="{{ filter_params.opt_temp_max }}">
+        <form id="filter-form" method="get" action="">
+          <div class="modal-body">
+            <!-- Preserve search term if it exists -->
+            {% if search_term %}
+            <input type="hidden" name="search" value="{{ search_term }}">
+            {% endif %}
+            
+            <!-- Optimal Temperature Range (grouped inputs) -->
+            <div class="mb-3">
+              <label class="form-label">Optimal Temperature Range (°C)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="filter-optimal-temp-min" name="opt_temp_min" placeholder="Min" value="{{ filter_params.opt_temp_min }}">
+                <span class="input-group-text">-</span>
+                <input type="number" class="form-control" id="filter-optimal-temp-max" name="opt_temp_max" placeholder="Max" value="{{ filter_params.opt_temp_max }}">
+              </div>
             </div>
-          </div>
-          <!-- Melting Temperature -->
-          <div class="mb-3">
-            <label class="form-label">Melting Temperature Range (°C)</label>
-            <div class="input-group">
-              <input type="number" class="form-control" id="filter-melting-temp-min" placeholder="Min" value="{{ filter_params.melt_temp_min }}">
-              <span class="input-group-text">-</span>
+            <!-- Melting Temperature -->
+            <div class="mb-3">
+              <label class="form-label">Melting Temperature Range (°C)</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="filter-melting-temp-min" name="melt_temp_min" placeholder="Min" value="{{ filter_params.melt_temp_min }}">
+                <span class="input-group-text">-</span>
+              </div>
             </div>
+             <!-- Activity -->
+            <div class="mb-3">
+              <label for="filter-activity-min" class="form-label">Activity (min U/mg)</label>
+              <input type="number" class="form-control" id="filter-activity-min" name="activity_min" placeholder="e.g., 10" value="{{ filter_params.activity_min }}">
+            </div>
+            <!-- Base Polymerase -->
+            <div class="mb-3">
+              <label for="filter-base-polymerase" class="form-label">Base Polymerase</label>
+              <input type="text" class="form-control" id="filter-base-polymerase" name="base_poly" placeholder="Type to filter" value="{{ filter_params.base_poly }}">
+            </div>
+            <!-- Modification Type -->
+            <div class="mb-3">
+              <label for="filter-modification-type" class="form-label">Modification Type</label>
+              <input type="text" class="form-control" id="filter-modification-type" name="mod_type" placeholder="Type to filter" value="{{ filter_params.mod_type }}">
+            </div>
+            
+            <!-- Always start on page 1 when filtering -->
+            <input type="hidden" name="mod_page" value="1">
           </div>
-           <!-- Activity -->
-          <div class="mb-3">
-            <label for="filter-activity-min" class="form-label">Activity (min U/mg)</label>
-            <input type="number" class="form-control" id="filter-activity-min" placeholder="e.g., 10" value="{{ filter_params.activity_min }}">
+          <div class="modal-footer">
+            <a href="{% if search_term %}?search={{ search_term }}{% else %}?{% endif %}" class="btn btn-secondary">Clear Filters</a>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
           </div>
-          <!-- Base Polymerase -->
-          <div class="mb-3">
-            <label for="filter-base-polymerase" class="form-label">Base Polymerase</label>
-            <input type="text" class="form-control" id="filter-base-polymerase" placeholder="Type to filter" value="{{ filter_params.base_poly }}">
-          </div>
-          <!-- Modification Type -->
-          <div class="mb-3">
-            <label for="filter-modification-type" class="form-label">Modification Type</label>
-            <input type="text" class="form-control" id="filter-modification-type" placeholder="Type to filter" value="{{ filter_params.mod_type }}">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button id="clear-filter" type="button" class="btn btn-secondary">Clear Filters</button>
-          <button id="apply-filter" type="button" class="btn btn-primary">Apply Filters</button>
-        </div>
+        </form>
       </div>
     </div>
   </div>
@@ -395,9 +485,10 @@
         return new bootstrap.Tooltip(el);
       });
       
-      // Enhanced search functionality
+      // Search form handling with debounce
+      let searchTimer;
       $('#search').on('input', function() {
-        let searchTerm = $(this).val().toLowerCase().trim();
+        let searchTerm = $(this).val().trim();
         
         // Show/hide clear button based on whether there's text
         if (searchTerm.length > 0) {
@@ -406,103 +497,23 @@
           $('.clear-search').hide();
         }
         
-        // Keep track of visible rows
-        let visibleRows = 0;
-        
-        // Search across multiple fields in each row
-        $('#modified-table-body tr').each(function() {
-          let name = $(this).find('td:nth-child(1)').text().toLowerCase();
-          let basePolymerase = $(this).find('td:nth-child(2)').text().toLowerCase();
-          let modType = $(this).find('td:nth-child(3)').text().toLowerCase();
-          
-          // Check if any field contains the search term
-          let matchesSearch = name.includes(searchTerm) || 
-                             basePolymerase.includes(searchTerm) || 
-                             modType.includes(searchTerm);
-                             
-          $(this).toggle(matchesSearch);
-          
-          if (matchesSearch) {
-            visibleRows++;
-          }
-        });
-        
-        // Show/hide the pagination based on search results
-        if (searchTerm.length > 0) {
-          $('nav[aria-label="Modified pagination"]').toggle(visibleRows > 0);
-        } else {
-          $('nav[aria-label="Modified pagination"]').show();
-        }
-        
-        // Show/hide no results message
-        if (searchTerm.length > 0 && visibleRows === 0) {
-          $('#no-results-message').show();
-        } else {
-          $('#no-results-message').hide();
+        // Debounce the search to avoid too many submissions
+        clearTimeout(searchTimer);
+        if (searchTerm.length === 0) {
+          // Clear search immediately
+          $('#search-form').submit();
+        } else if (searchTerm.length >= 2) {
+          // Wait 500ms before submitting search
+          searchTimer = setTimeout(function() {
+            $('#search-form').submit();
+          }, 500);
         }
       });
 
-      // Clear search
-      $('.clear-search, .clear-search-results').on('click', function() {
-        $('#search').val('').trigger('input').focus();
-      });
-
-      // Apply filters and submit the form
-      $('#apply-filter').click(function() {
-        var currentUrl = new URL(window.location.href);
-        var params = currentUrl.searchParams;
-        
-        // Clear existing filter params
-        params.delete('opt_temp_min');
-        params.delete('opt_temp_max');
-        params.delete('melt_temp_min');
-        params.delete('activity_min');
-        params.delete('base_poly');
-        params.delete('mod_type');
-        
-        // Add new filter params
-        var optTempMin = $('#filter-optimal-temp-min').val();
-        if (optTempMin) params.set('opt_temp_min', optTempMin);
-        
-        var optTempMax = $('#filter-optimal-temp-max').val();
-        if (optTempMax) params.set('opt_temp_max', optTempMax);
-        
-        var meltTempMin = $('#filter-melting-temp-min').val();
-        if (meltTempMin) params.set('melt_temp_min', meltTempMin);
-        
-        var activityMin = $('#filter-activity-min').val();
-        if (activityMin) params.set('activity_min', activityMin);
-        
-        var basePolymerase = $('#filter-base-polymerase').val();
-        if (basePolymerase) params.set('base_poly', basePolymerase);
-        
-        var modificationType = $('#filter-modification-type').val();
-        if (modificationType) params.set('mod_type', modificationType);
-        
-        // Ensure we're on page 1 with the new filters
-        params.set('mod_page', 1);
-        
-        // Navigate to the new URL
-        window.location.href = currentUrl.toString();
-      });
-
-      // Clear filters by removing all filter params
-      $('#clear-filter').click(function() {
-        var currentUrl = new URL(window.location.href);
-        var params = currentUrl.searchParams;
-        
-        params.delete('opt_temp_min');
-        params.delete('opt_temp_max');
-        params.delete('melt_temp_min');
-        params.delete('activity_min');
-        params.delete('base_poly');
-        params.delete('mod_type');
-        
-        // Reset to page 1
-        params.set('mod_page', 1);
-        
-        // Navigate to the new URL
-        window.location.href = currentUrl.toString();
+      // Clear search button
+      $('.clear-search').on('click', function() {
+        $('#search').val('');
+        $('#search-form').submit();
       });
 
       // Make table rows clickable to navigate to their dedicated detail pages.
@@ -512,24 +523,16 @@
         window.location = $(this).data('url');
       });
 
-      // Hide any unexpected pagination elements
-      setTimeout(function() {
-        $('#modified > nav:not([aria-label="Modified pagination"])').remove();
-        $('#modified > div > nav:not([aria-label="Modified pagination"])').remove();
-        $('#modified > ul.pagination').remove();
-      }, 100);
-
-      // Show loading spinner during AJAX events (if applicable)
-      $(document).ajaxStart(function() {
+      // Show loading spinner during page loads
+      $(window).on('beforeunload', function() {
         $('.spinner-border').show();
-      }).ajaxStop(function() {
-        $('.spinner-border').hide();
       });
       
       // Press ESC to clear search
       $(document).keyup(function(e) {
         if (e.key === "Escape" && $('#search').val().length > 0) {
-          $('#search').val('').trigger('input').focus();
+          $('#search').val('');
+          $('#search-form').submit();
         }
       });
     });
