@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, CharField, F
 from .models import WildTypePolymerase, ModifiedPolymerase, FusionDomain
 
 def get_page_range(paginator, page, window=2):
@@ -27,10 +27,23 @@ def get_page_range(paginator, page, window=2):
 
 
 def polymerase_list(request):
-    # Fetch and order each queryset
+    # Fetch wild type and fusion domain querysets
     wild_qs = WildTypePolymerase.objects.all().order_by('name')
-    modified_qs = ModifiedPolymerase.objects.all().order_by('name')
     fusion_qs = FusionDomain.objects.all().order_by('name')
+    
+    # Annotate modified polymerases with a custom sort field
+    # This puts letters first, then numbers, then symbols
+    modified_qs = ModifiedPolymerase.objects.all().annotate(
+        sort_name=Case(
+            # If name starts with a letter, keep as is (priority 0)
+            When(name__regex=r'^[A-Za-z]', then=Value('0') + F('name')),
+            # If name starts with a number, make second priority
+            When(name__regex=r'^[0-9]', then=Value('1') + F('name')),
+            # Everything else (symbols) goes last
+            default=Value('2') + F('name'),
+            output_field=CharField(),
+        )
+    ).order_by('sort_name')
     
     # Get search term
     search_term = request.GET.get('search', '')
@@ -53,13 +66,26 @@ def polymerase_list(request):
     
     # Filter the modified_qs based on parameters
     if opt_temp_min:
-        modified_qs = modified_qs.filter(optimal_temp__gte=float(opt_temp_min))
+        try:
+            modified_qs = modified_qs.filter(optimal_temp__gte=float(opt_temp_min))
+        except (ValueError, TypeError):
+            # Handle non-numeric values gracefully
+            pass
     if opt_temp_max:
-        modified_qs = modified_qs.filter(optimal_temp__lte=float(opt_temp_max))
+        try:
+            modified_qs = modified_qs.filter(optimal_temp__lte=float(opt_temp_max))
+        except (ValueError, TypeError):
+            pass
     if melt_temp_min:
-        modified_qs = modified_qs.filter(melting_temp__gte=float(melt_temp_min))
+        try:
+            modified_qs = modified_qs.filter(melting_temp__gte=float(melt_temp_min))
+        except (ValueError, TypeError):
+            pass
     if activity_min:
-        modified_qs = modified_qs.filter(activity__gte=float(activity_min))
+        try:
+            modified_qs = modified_qs.filter(activity__gte=float(activity_min))
+        except (ValueError, TypeError):
+            pass
     if base_poly:
         modified_qs = modified_qs.filter(base_polymerase__icontains=base_poly)
     if mod_type:
