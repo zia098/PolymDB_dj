@@ -29,16 +29,7 @@ def get_page_range(paginator, page, window=2):
 def polymerase_list(request):
     # Fetch and order each queryset
     wild_qs = WildTypePolymerase.objects.all().order_by('name')
-    #modified_qs = ModifiedPolymerase.objects.all().order_by('name')
-    modified_qs = ModifiedPolymerase.objects.all().annotate(
-        sort_name=Case(
-            # If the first character is a letter, keep it as is
-            When(name__regex=r'^[A-Za-z]', then='name'),
-            # Otherwise, prepend 'z' to push it to the end
-            default=Value('z') + Value('_') + models.F('name'),
-            output_field=CharField(),
-        )
-    ).order_by('sort_name')
+    modified_qs = ModifiedPolymerase.objects.all().order_by('name')
     fusion_qs = FusionDomain.objects.all().order_by('name')
     
     # Get search term
