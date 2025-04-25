@@ -33,17 +33,15 @@ def polymerase_list(request):
     
     # Annotate modified polymerases with a custom sort field
     # This puts letters first, then numbers, then symbols
+# Force names to start with letters to be sorted case-insensitively
     modified_qs = ModifiedPolymerase.objects.all().annotate(
-        sort_name=Case(
-            # If name starts with a letter, keep as is (priority 0)
-            When(name__regex=r'^[A-Za-z]', then=Value('0') + F('name')),
-            # If name starts with a number, make second priority
-            When(name__regex=r'^[0-9]', then=Value('1') + F('name')),
-            # Everything else (symbols) goes last
-            default=Value('2') + F('name'),
-            output_field=CharField(),
+        sort_prefix=Case(
+        When(name__regex=r'^[A-Za-z]', then=Value('0')),
+        When(name__regex=r'^[0-9]', then=Value('1')),
+        default=Value('2'),
+        output_field=CharField(),
         )
-    ).order_by('sort_name')
+     ).order_by('sort_prefix', 'name')
     
     # Get search term
     search_term = request.GET.get('search', '')
