@@ -97,10 +97,11 @@
             </div>
             {% endif %}
             
-            {% if polymerase.applications and polymerase.applications != "None" %}
+
+            {% if polymerase.applications and polymerase.applications != "None" and polymerase.applications != "none" and polymerase.applications != "" %}
             <div class="property-item">
-              <span class="property-label">Application:</span>
-              <div>{{ polymerase.applications }}</div>
+              <span class="property-label">Applications:</span>
+              <div id="applications-content">{{ polymerase.applications }}</div>
             </div>
             {% endif %}
             
