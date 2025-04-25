@@ -71,7 +71,8 @@ class ModifiedPolymerase(models.Model):
     doi = models.TextField(db_column="DOI", null=True, blank=True)
 
     class Meta:
-        db_table = "all_polymerases_1"
+        db_table = "all_modified_polymerases"
+        #db_table = "all_polymerases_1"
         #db_table = "Batch_1"
 
 
