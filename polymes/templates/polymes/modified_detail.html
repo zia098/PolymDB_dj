@@ -98,12 +98,13 @@
             {% endif %}
             
 
-            {% if polymerase.applications and polymerase.applications != "None" and polymerase.applications != "none" and polymerase.applications != "" %}
+            {% if polymerase.applications and polymerase.applications != "None" %}
             <div class="property-item">
-              <span class="property-label">Applications:</span>
-              <div id="applications-content">{{ polymerase.applications }}</div>
+              <span class="property-label">Application:</span>
+              <div>{{ polymerase.applications }}</div>
             </div>
             {% endif %}
+
             
             {% if polymerase.exo_activity_5_3 and polymerase.exo_activity_5_3 != "None" %}
             <div class="property-item">
