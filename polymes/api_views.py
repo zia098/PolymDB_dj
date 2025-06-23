@@ -1,9 +1,8 @@
 # polymes/api_views.py
-from rest_framework import generics
 from .models import ModifiedPolymerase
 from .serializers import ModifiedPolymeraseSerializer
+from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
-
 
 
 
